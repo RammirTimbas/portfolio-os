@@ -1,53 +1,23 @@
 import { motion } from "framer-motion";
-
-import {
-  Minus,
-  Square,
-  X,
-} from "lucide-react";
-
+import { Minus, Square, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useRef, useCallback, useState } from "react";
-
+import { useRef, useState, useCallback, useEffect } from "react";
 import ResizeHandle from "./ResizeHandle";
 
 interface Props {
   title: string;
-
   zIndex: number;
-
   isFocused: boolean;
-
   isMaximized: boolean;
-
-  position: {
-    x: number;
-    y: number;
-  };
-
-  size: {
-    width: number;
-    height: number;
-  };
-
+  isMinimized?: boolean;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
   children: ReactNode;
-
   onMouseDown: () => void;
-
   onClose: () => void;
-
   onMinimize: () => void;
-
   onMaximize: () => void;
-
-  onResize: (
-    updates: {
-      width?: number;
-      height?: number;
-      x?: number;
-      y?: number;
-    }
-  ) => void;
+  onResize: (updates: { width?: number; height?: number; x?: number; y?: number }) => void;
 }
 
 export default function WindowFrame({
@@ -55,6 +25,7 @@ export default function WindowFrame({
   zIndex,
   isFocused,
   isMaximized,
+  isMinimized,
   position,
   size,
   children,
@@ -66,77 +37,77 @@ export default function WindowFrame({
 }: Props) {
   const [activeAction, setActiveAction] = useState<"drag" | "resize" | null>(null);
 
-  const interactionData = useRef({
-    startX: 0,
-    startY: 0,
-    startPos: { x: 0, y: 0 },
-    startSize: { width: 0, height: 0 },
-    direction: "" as "right" | "bottom" | "corner",
+  // Track interaction state in refs to avoid closure staleness in global listeners
+  const stateRef = useRef({
+    position,
+    size,
+    onResize,
+    interaction: {
+      action: null as "drag" | "resize" | null,
+      startX: 0,
+      startY: 0,
+      startPos: { x: 0, y: 0 },
+      startSize: { width: 0, height: 0 },
+      direction: "" as "right" | "bottom" | "corner",
+    }
   });
 
-  const onPointerMove = useCallback((moveEvent: React.PointerEvent) => {
-    if (!activeAction) return;
+  // Keep refs in sync with latest props
+  useEffect(() => {
+    stateRef.current.position = position;
+    stateRef.current.size = size;
+    stateRef.current.onResize = onResize;
+  }, [position, size, onResize]);
 
-    const deltaX = moveEvent.clientX - interactionData.current.startX;
-    const deltaY = moveEvent.clientY - interactionData.current.startY;
+  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
+    const state = stateRef.current;
+    if (!state.interaction.action) return;
 
-    if (activeAction === "drag") {
-      onResize({
-        x: interactionData.current.startPos.x + deltaX,
-        y: interactionData.current.startPos.y + deltaY,
+    const deltaX = e.clientX - state.interaction.startX;
+    const deltaY = e.clientY - state.interaction.startY;
+
+    if (state.interaction.action === "drag") {
+      state.onResize({
+        x: state.interaction.startPos.x + deltaX,
+        y: state.interaction.startPos.y + deltaY,
       });
-      return;
-    }
-
-    if (activeAction === "resize") {
+    } else if (state.interaction.action === "resize") {
       const minWidth = 420;
       const minHeight = 300;
       const updates: { width?: number; height?: number } = {};
 
-      if (
-        interactionData.current.direction === "right" ||
-        interactionData.current.direction === "corner"
-      ) {
-        updates.width = Math.max(
-          minWidth,
-          interactionData.current.startSize.width + deltaX
-        );
+      if (state.interaction.direction === "right" || state.interaction.direction === "corner") {
+        updates.width = Math.max(minWidth, state.interaction.startSize.width + deltaX);
       }
-
-      if (
-        interactionData.current.direction === "bottom" ||
-        interactionData.current.direction === "corner"
-      ) {
-        updates.height = Math.max(
-          minHeight,
-          interactionData.current.startSize.height + deltaY
-        );
+      if (state.interaction.direction === "bottom" || state.interaction.direction === "corner") {
+        updates.height = Math.max(minHeight, state.interaction.startSize.height + deltaY);
       }
-
-      onResize(updates);
+      state.onResize(updates);
     }
-  }, [activeAction, onResize]);
-
-  const onPointerUp = useCallback((e: React.PointerEvent) => {
-    setActiveAction(null);
-    document.body.style.userSelect = "";
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
   }, []);
 
-  function startInteraction(
-    event: React.PointerEvent | React.MouseEvent,
+  const handleGlobalPointerUp = useCallback(() => {
+    stateRef.current.interaction.action = null;
+    setActiveAction(null);
+    document.body.style.userSelect = "";
+    window.removeEventListener("pointermove", handleGlobalPointerMove);
+    window.removeEventListener("pointerup", handleGlobalPointerUp);
+  }, [handleGlobalPointerMove]);
+
+  const startInteraction = (
+    e: React.PointerEvent,
     action: "drag" | "resize",
     direction: "right" | "bottom" | "corner" = "right"
-  ) {
-    // Only handle primary pointer (usually left click)
-    if (event.button !== 0) return;
+  ) => {
+    if (e.button !== 0) return;
 
-    event.preventDefault();
-    event.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-    interactionData.current = {
-      startX: event.clientX,
-      startY: event.clientY,
+    stateRef.current.interaction = {
+      action,
+      startX: e.clientX,
+      startY: e.clientY,
       startPos: { ...position },
       startSize: { ...size },
       direction,
@@ -146,10 +117,17 @@ export default function WindowFrame({
     document.body.style.userSelect = "none";
     if (action === "drag") onMouseDown();
 
-    if ("setPointerCapture" in event.currentTarget) {
-      (event.currentTarget as HTMLElement).setPointerCapture((event as React.PointerEvent).pointerId);
-    }
-  }
+    window.addEventListener("pointermove", handleGlobalPointerMove);
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+  };
+
+  // Cleanup listeners if the component unmounts
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+    };
+  }, [handleGlobalPointerMove, handleGlobalPointerUp]);
 
   return (
     <motion.div
@@ -160,6 +138,8 @@ export default function WindowFrame({
         width: size.width,
         height: size.height,
         zIndex,
+        display: isMinimized ? "none" : "flex",
+        flexDirection: "column",
       }}
       onMouseDown={onMouseDown}
       className={`
@@ -167,144 +147,77 @@ export default function WindowFrame({
         overflow-hidden
         backdrop-blur-xl
         bg-zinc-900/80
-
-        ${
-          isMaximized
-            ? "border-0 rounded-none"
-            : `
-              border
-              rounded-2xl
-              shadow-2xl
-              ${
-                isFocused
-                  ? "border-zinc-500"
-                  : "border-zinc-800"
-              }
-            `
-        }
+        ${isMaximized ? "border-0 rounded-none shadow-none" : "border rounded-2xl shadow-2xl"}
+        ${isFocused ? "border-zinc-500" : "border-zinc-800"}
       `}
     >
       {!isMaximized && (
-      <>
-        <ResizeHandle
-          className="
-            bottom-[-2px]
-            left-0
-            h-3
-            w-full
-            cursor-row-resize
-          "
-          onPointerDown={(event) =>
-            startInteraction(event, "resize", "bottom")
-          }
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-        />
-
-        <ResizeHandle
-          className="
-            right-[-2px]
-            top-0
-            h-full
-            w-3
-            cursor-col-resize
-          "
-          onPointerDown={(event) =>
-            startInteraction(event, "resize", "right")
-          }
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-        />
-
-        <ResizeHandle
-          className="
-            bottom-[-2px]
-            right-[-2px]
-            h-5
-            w-5
-            cursor-nwse-resize
-          "
-          onPointerDown={(event) =>
-            startInteraction(event, "resize", "corner")
-          }
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-        />
+        <>
+          <ResizeHandle
+            className="bottom-0 left-0 h-1.5 w-full cursor-row-resize"
+            onPointerDown={(e) => startInteraction(e, "resize", "bottom")}
+          />
+          <ResizeHandle
+            className="right-0 top-12 h-[calc(100%-48px)] w-1.5 cursor-col-resize"
+            onPointerDown={(e) => startInteraction(e, "resize", "right")}
+          />
+          <ResizeHandle
+            className="bottom-0 right-0 h-4 w-4 cursor-nwse-resize z-[110]"
+            onPointerDown={(e) => startInteraction(e, "resize", "corner")}
+          />
         </>
       )}
+
       <div
-          onPointerDown={(e) => {
-            if (isMaximized) return;
-            // Don't start drag if clicking buttons
-            if ((e.target as HTMLElement).closest("button")) return;
-            startInteraction(e, "drag");
-          }}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          className="
-            flex
-            h-12
-            cursor-move
-            items-center
-            justify-between
-            border-b
-            border-zinc-800
-            px-4
-          "
-        >
-        <span className="text-sm font-medium text-white">
+        onPointerDown={(e) => {
+          if (isMaximized) return;
+          if ((e.target as HTMLElement).closest("button")) return;
+          startInteraction(e, "drag");
+        }}
+        className="
+          flex
+          h-12
+          shrink-0
+          cursor-move
+          items-center
+          justify-between
+          border-b
+          border-zinc-800
+          px-4
+          relative
+          z-10
+        "
+      >
+        <span className="text-sm font-medium text-white truncate mr-4 pointer-events-none select-none">
           {title}
         </span>
 
         <div className="flex items-center gap-2">
           <button
-            onClick={onMinimize}
-            className="
-              flex
-              h-8
-              w-8
-              items-center
-              justify-center
-              rounded-lg
-              hover:bg-zinc-800
-            "
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onMinimize(); }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
           >
             <Minus size={16} />
           </button>
-
           <button
-            onClick={onMaximize}
-            className="
-              flex
-              h-8
-              w-8
-              items-center
-              justify-center
-              rounded-lg
-              hover:bg-zinc-800
-            "
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onMaximize(); }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
           >
             <Square size={14} />
           </button>
-
           <button
-            onClick={onClose}
-            className="
-              flex
-              h-8
-              w-8
-              items-center
-              justify-center
-              rounded-lg
-              hover:bg-red-500/80
-            "
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-red-500/80 text-zinc-400 hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
         </div>
       </div>
 
-      <div className="h-[calc(100%-48px)] overflow-auto">
+      <div className="flex-1 overflow-auto relative z-0">
         {children}
       </div>
     </motion.div>
