@@ -49,7 +49,7 @@ export default function WindowManager() {
               updateWindowSize(windowInstance.id, updates);
             }}
           >
-            <Component />
+            <Component params={windowInstance.params} windowId={windowInstance.id} />
           </WindowFrame>
         );
       })}

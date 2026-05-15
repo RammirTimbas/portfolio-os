@@ -9,6 +9,9 @@ export default function DesktopIcons() {
   const windows = useWindowStore((state) => state.windows);
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
 
+  // Filter out utility windows from the desktop
+  const desktopApps = apps.filter(app => !app.hideFromDesktop);
+
   const handleOpenApp = (app: AppDefinition) => {
     openWindow({
       id: crypto.randomUUID(),
@@ -40,14 +43,17 @@ export default function DesktopIcons() {
       {
         label: "Properties",
         icon: Info,
-        action: () => console.log(`Properties for ${app.title}`),
+        action: () => {
+           // Logic to open properties window for the app itself if needed
+           console.log(`Properties for ${app.title}`);
+        },
       },
     ]);
   };
 
   return (
     <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,100px)] gap-2 p-4 h-full pointer-events-none">
-      {apps.map((app) => {
+      {desktopApps.map((app) => {
         const Icon = app.icon;
         const iconColors: Record<string, string> = {
           about: "from-blue-500 to-blue-600",

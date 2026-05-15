@@ -1,8 +1,9 @@
 import { apps } from "../../data/apps";
 import { useWindowStore } from "../../stores/windowStore";
 import { useContextMenuStore } from "../../stores/contextMenuStore";
+import { useShellStore } from "../../stores/shellStore";
 import { motion } from "framer-motion";
-import { Layout, Settings, Monitor } from "lucide-react";
+import { Layout, Settings } from "lucide-react";
 
 export default function Taskbar() {
   const {
@@ -14,11 +15,12 @@ export default function Taskbar() {
     openWindow,
   } = useWindowStore();
 
+  const { toggleStartMenu } = useShellStore();
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
 
   const handleTaskbarContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    openContextMenu(e.clientX, e.clientY - 100, [ // Offset upwards
+    openContextMenu(e.clientX, e.clientY - 100, [
       {
         label: "Show Desktop",
         icon: Layout,
@@ -76,7 +78,13 @@ export default function Taskbar() {
       "
     >
       {/* Start Button */}
-      <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg hover:bg-white/5 transition-colors group">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleStartMenu();
+        }}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg hover:bg-white/5 transition-colors group"
+      >
         <div className="grid grid-cols-2 gap-0.5">
           <div className="h-2 w-2 rounded-sm bg-blue-400 group-hover:scale-110 transition-transform" />
           <div className="h-2 w-2 rounded-sm bg-blue-500 group-hover:scale-110 transition-transform" />
@@ -103,6 +111,7 @@ export default function Taskbar() {
             projects: "text-amber-400",
             terminal: "text-emerald-400",
             settings: "text-slate-400",
+            'project-viewer': "text-blue-500",
           };
 
           return (

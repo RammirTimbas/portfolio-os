@@ -2,6 +2,7 @@ import DesktopIcons from "../../components/os/DesktopIcons";
 import WindowManager from "../../components/os/WindowManager";
 import Taskbar from "../../components/taskbar/Taskbar";
 import ContextMenu from "../../components/os/ContextMenu";
+import StartMenu from "../../components/os/StartMenu";
 import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useWindowStore } from "../../stores/windowStore";
 import { apps } from "../../data/apps";
@@ -12,8 +13,9 @@ import {
   Image as ImageIcon,
   Layout,
   Terminal,
-  User,
-  Settings as SettingsIcon
+  ShieldCheck,
+  Settings as SettingsIcon,
+  AppWindow
 } from "lucide-react";
 
 const wallpaperClasses = {
@@ -25,7 +27,7 @@ const wallpaperClasses = {
 
 export default function DesktopShell() {
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
-  const { openWindow, minimizeAll, windows } = useWindowStore();
+  const { openWindow, minimizeAll } = useWindowStore();
   const { wallpaper, setWallpaper } = useConfigStore();
 
   const handleOpenApp = (appId: string) => {
@@ -36,8 +38,8 @@ export default function DesktopShell() {
         appId: app.id,
         title: app.title,
         position: {
-          x: window.innerWidth / 2 - app.defaultSize.width / 2 + (windows.length * 20),
-          y: window.innerHeight / 2 - app.defaultSize.height / 2 + (windows.length * 20),
+          x: window.innerWidth / 2 - app.defaultSize.width / 2 + (Math.random() * 20),
+          y: window.innerHeight / 2 - app.defaultSize.height / 2 + (Math.random() * 20),
         },
         isMaximized: false,
         size: app.defaultSize,
@@ -57,13 +59,18 @@ export default function DesktopShell() {
       },
       { divider: true },
       {
+        label: "Open Workspace",
+        icon: AppWindow,
+        action: () => handleOpenApp("projects")
+      },
+      {
         label: "Open Terminal",
         icon: Terminal,
         action: () => handleOpenApp("terminal")
       },
       {
-        label: "About Me",
-        icon: User,
+        label: "Identity Dashboard",
+        icon: ShieldCheck,
         action: () => handleOpenApp("about")
       },
       { divider: true },
@@ -103,6 +110,8 @@ export default function DesktopShell() {
       <DesktopIcons />
 
       <WindowManager />
+
+      <StartMenu />
 
       <Taskbar />
 
