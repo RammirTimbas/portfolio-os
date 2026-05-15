@@ -36,13 +36,13 @@ export default function ContextMenu() {
           ) : (
             <button
               onClick={() => {
-                item.action();
+                item.action?.();
                 closeContextMenu();
               }}
               className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
             >
               {item.icon && <item.icon size={14} />}
-              <span>{item.label}</span>
+              <span>{item.label ?? ""}</span>
             </button>
           )}
         </div>

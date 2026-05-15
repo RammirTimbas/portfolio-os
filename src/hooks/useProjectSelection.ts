@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { Project, ProjectCategory } from '../types/project';
+import type { ProjectCategory } from '../types/project';
 import { projects } from '../data/projects';
 
 export const useProjectSelection = () => {

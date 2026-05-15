@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Minus, Square, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import ResizeHandle from "./ResizeHandle";
 
 interface Props {
@@ -35,8 +35,6 @@ export default function WindowFrame({
   onMaximize,
   onResize,
 }: Props) {
-  const [activeAction, setActiveAction] = useState<"drag" | "resize" | null>(null);
-
   // Track interaction state in refs to avoid closure staleness in global listeners
   const stateRef = useRef({
     position,
@@ -88,7 +86,6 @@ export default function WindowFrame({
 
   const handleGlobalPointerUp = useCallback(() => {
     stateRef.current.interaction.action = null;
-    setActiveAction(null);
     document.body.style.userSelect = "";
     window.removeEventListener("pointermove", handleGlobalPointerMove);
     window.removeEventListener("pointerup", handleGlobalPointerUp);
@@ -113,7 +110,6 @@ export default function WindowFrame({
       direction,
     };
 
-    setActiveAction(action);
     document.body.style.userSelect = "none";
     if (action === "drag") onMouseDown();
 
@@ -133,20 +129,20 @@ export default function WindowFrame({
     <motion.div
       style={{
         position: "absolute",
-        left: position.x,
-        top: position.y,
-        width: size.width,
-        height: size.height,
+        left: isMaximized ? 0 : position.x,
+        top: isMaximized ? 0 : position.y,
+        width: isMaximized ? "100%" : size.width,
+        height: isMaximized ? "100%" : size.height,
         zIndex,
         display: isMinimized ? "none" : "flex",
         flexDirection: "column",
       }}
       onMouseDown={onMouseDown}
       className={`
-        absolute
         overflow-hidden
         backdrop-blur-xl
         bg-zinc-900/80
+        transition-[border-radius,border-width] duration-300
         ${isMaximized ? "border-0 rounded-none shadow-none" : "border rounded-2xl shadow-2xl"}
         ${isFocused ? "border-zinc-500" : "border-zinc-800"}
       `}
@@ -174,11 +170,10 @@ export default function WindowFrame({
           if ((e.target as HTMLElement).closest("button")) return;
           startInteraction(e, "drag");
         }}
-        className="
+        className={`
           flex
           h-12
           shrink-0
-          cursor-move
           items-center
           justify-between
           border-b
@@ -186,7 +181,8 @@ export default function WindowFrame({
           px-4
           relative
           z-10
-        "
+          ${isMaximized ? "cursor-default" : "cursor-move"}
+        `}
       >
         <span className="text-sm font-medium text-white truncate mr-4 pointer-events-none select-none">
           {title}

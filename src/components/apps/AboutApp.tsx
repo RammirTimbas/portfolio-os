@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   FileJson,
   Check,
-  Copy,
   Eye,
   ShieldCheck,
   Cpu

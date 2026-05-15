@@ -1,7 +1,7 @@
 import { FolderKanban } from "lucide-react";
 
 interface Props {
-  params: { project: any };
+  params?: { project: any };
 }
 
 export default function ProjectProperties({ params }: Props) {

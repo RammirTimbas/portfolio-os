@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 
-interface ContextMenuItem {
-  label: string;
-  action: () => void;
-  icon?: any;
+export interface ContextMenuItem {
   divider?: boolean;
+  label?: string;
+  action?: () => void;
+  icon?: any;
 }
 
 interface ContextMenuState {

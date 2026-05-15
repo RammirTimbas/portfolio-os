@@ -7,8 +7,8 @@ import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useWindowStore } from "../../stores/windowStore";
 import { apps } from "../../data/apps";
 import { useConfigStore } from "../../stores/configStore";
+import { useEffect } from "react";
 import {
-  Monitor,
   RefreshCw,
   Image as ImageIcon,
   Layout,
@@ -30,6 +30,34 @@ export default function DesktopShell() {
   const { openWindow, minimizeAll } = useWindowStore();
   const { wallpaper, setWallpaper } = useConfigStore();
 
+  useEffect(() => {
+    // Fresh launch key to ensure it triggers for you
+    const firstLaunchKey = "portfolio-os:initial-maximized:v10";
+    if (localStorage.getItem(firstLaunchKey)) return;
+    localStorage.setItem(firstLaunchKey, "1");
+
+    const app = apps.find((a) => a.id === "projects");
+    if (!app) return;
+
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    openWindow({
+      id: crypto.randomUUID(),
+      appId: app.id,
+      title: app.title,
+      position: { x: 0, y: 0 },
+      isMaximized: true,
+      size: { width: screenWidth, height: screenHeight - 64 },
+      minSize: { width: 420, height: 300 },
+      prevSize: app.defaultSize,
+      prevPosition: {
+        x: Math.max(0, screenWidth / 2 - app.defaultSize.width / 2),
+        y: Math.max(0, screenHeight / 2 - app.defaultSize.height / 2 - 32),
+      }
+    });
+  }, [openWindow]);
+
   const handleOpenApp = (appId: string) => {
     const app = apps.find(a => a.id === appId);
     if (app) {
@@ -41,9 +69,16 @@ export default function DesktopShell() {
           x: window.innerWidth / 2 - app.defaultSize.width / 2 + (Math.random() * 20),
           y: window.innerHeight / 2 - app.defaultSize.height / 2 + (Math.random() * 20),
         },
-        isMaximized: false,
+        isMaximized: app.defaultMaximized ?? false,
         size: app.defaultSize,
         minSize: { width: 420, height: 300 },
+        ...(app.defaultMaximized ? {
+          prevSize: app.defaultSize,
+          prevPosition: {
+            x: window.innerWidth / 2 - app.defaultSize.width / 2,
+            y: window.innerHeight / 2 - app.defaultSize.height / 2 - 32,
+          }
+        } : {})
       });
     }
   };

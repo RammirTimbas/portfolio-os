@@ -4,12 +4,11 @@ import ProjectGrid from "./workspace/ProjectGrid";
 import ProjectDetails from "./workspace/ProjectDetails";
 import WorkspaceTerminal from "./workspace/WorkspaceTerminal";
 import { useProjectSelection } from "../../hooks/useProjectSelection";
-import type { ProjectCategory, Project } from "../../types/project";
+import type { Project } from "../../types/project";
 import {
   Search,
   ChevronRight,
   LayoutGrid,
-  RotateCcw,
   Plus,
   ArrowLeft,
   ArrowRight,

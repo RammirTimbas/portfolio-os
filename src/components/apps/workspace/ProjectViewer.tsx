@@ -2,11 +2,11 @@ import type { Project } from "../../../types/project";
 import { ExternalLink, Code2, Globe, Shield } from "lucide-react";
 
 interface Props {
-  params: { project: Project };
+  params?: { project: Project };
 }
 
 export default function ProjectViewer({ params }: Props) {
-  const { project } = params;
+  const project = params?.project;
 
   if (!project) return null;
 

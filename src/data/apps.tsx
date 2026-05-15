@@ -1,4 +1,4 @@
-import { Terminal, User, Layout, Settings, FolderKanban, Info, ShieldCheck } from "lucide-react";
+import { Terminal, Layout, Settings, FolderKanban, Info, ShieldCheck } from "lucide-react";
 import AboutApp from "../components/apps/AboutApp";
 import WorkspaceApp from "../components/apps/WorkspaceApp";
 import ProjectViewer from "../components/apps/workspace/ProjectViewer";
@@ -20,6 +20,7 @@ export const apps: AppDefinition[] = [
     icon: Layout,
     component: WorkspaceApp,
     defaultSize: { width: 1000, height: 700 },
+    defaultMaximized: true,
   },
   {
     id: "project-viewer",

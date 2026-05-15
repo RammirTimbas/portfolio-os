@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Project } from "../../../types/project";
-import { ExternalLink, Play, Terminal, Shield, Package, History, Info, CheckCircle2, Code2 } from "lucide-react";
+import { Play, Terminal, Shield, Package, History, Info, CheckCircle2, Code2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Props {

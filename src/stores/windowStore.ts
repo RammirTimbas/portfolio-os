@@ -13,7 +13,7 @@ interface WindowState {
   minSize: { width: number; height: number };
   prevSize?: { width: number; height: number };
   prevPosition?: { x: number; y: number };
-  params?: any; // Added to support passing data to app components
+  params?: any;
 }
 
 interface WindowStore {
@@ -35,24 +35,37 @@ export const useWindowStore = create<WindowStore>((set) => ({
   maxZIndex: 10,
 
   openWindow: (windowData) => set((state) => {
-    // If it's a specific project window, we allow multiples.
-    // If it's a main app, we focus existing.
     const exists = !windowData.params && state.windows.find(w => w.appId === windowData.appId);
 
     if (exists) {
       return {
         windows: state.windows.map(w =>
           w.appId === windowData.appId
-            ? { ...w, isFocused: true, isMinimized: false, zIndex: state.maxZIndex + 1 }
+            ? {
+                ...w,
+                isFocused: true,
+                isMinimized: false,
+                zIndex: state.maxZIndex + 1,
+                isMaximized: windowData.isMaximized ?? w.isMaximized,
+                position: windowData.isMaximized ? { x: 0, y: 0 } : (windowData.position ?? w.position),
+                size: windowData.isMaximized ? (windowData.size ?? w.size) : (windowData.size ?? w.size),
+              }
             : { ...w, isFocused: false }
         ),
         maxZIndex: state.maxZIndex + 1
       };
     }
+
     return {
       windows: [
         ...state.windows.map(w => ({ ...w, isFocused: false })),
-        { ...windowData, isFocused: true, isMinimized: false, zIndex: state.maxZIndex + 1 }
+        {
+          ...windowData,
+          isMaximized: !!windowData.isMaximized,
+          isFocused: true,
+          isMinimized: false,
+          zIndex: state.maxZIndex + 1
+        }
       ],
       maxZIndex: state.maxZIndex + 1
     };
@@ -91,7 +104,7 @@ export const useWindowStore = create<WindowStore>((set) => ({
             prevPosition: w.position,
             prevSize: w.size,
             position: { x: 0, y: 0 },
-            size: { width: screenWidth, height: screenHeight - 64 },
+            size: { width: screenWidth, height: screenHeight },
           }
         : w
     ),

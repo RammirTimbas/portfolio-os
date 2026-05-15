@@ -15,4 +15,5 @@ export interface AppDefinition {
   };
   component: React.ComponentType<AppProps>;
   hideFromDesktop?: boolean;
+  defaultMaximized?: boolean;
 }

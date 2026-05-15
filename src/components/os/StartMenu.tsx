@@ -1,7 +1,7 @@
 import { apps } from "../../data/apps";
 import { useWindowStore } from "../../stores/windowStore";
 import { useShellStore } from "../../stores/shellStore";
-import { Search, Power, User, Settings as SettingsIcon, ShieldCheck, AppWindow, Clock } from "lucide-react";
+import { Search, Power, Settings as SettingsIcon, ShieldCheck, AppWindow, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { profileData } from "../../data/profile";
 

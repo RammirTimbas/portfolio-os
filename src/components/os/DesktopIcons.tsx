@@ -13,20 +13,31 @@ export default function DesktopIcons() {
   const desktopApps = apps.filter(app => !app.hideFromDesktop);
 
   const handleOpenApp = (app: AppDefinition) => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
     openWindow({
       id: crypto.randomUUID(),
       appId: app.id,
       title: app.title,
       position: {
-        x: window.innerWidth / 2 - app.defaultSize.width / 2 + (windows.length * 20),
-        y: window.innerHeight / 2 - app.defaultSize.height / 2 + (windows.length * 20),
+        x: screenWidth / 2 - app.defaultSize.width / 2 + (windows.length * 20),
+        y: screenHeight / 2 - app.defaultSize.height / 2 + (windows.length * 20),
       },
-      isMaximized: false,
+      isMaximized: app.defaultMaximized ?? false,
       size: app.defaultSize,
       minSize: {
         width: 420,
         height: 300,
       },
+      // Provide restore state if it opens maximized
+      ...(app.defaultMaximized ? {
+        prevSize: app.defaultSize,
+        prevPosition: {
+          x: screenWidth / 2 - app.defaultSize.width / 2,
+          y: screenHeight / 2 - app.defaultSize.height / 2 - 32,
+        }
+      } : {})
     });
   };
 
@@ -44,7 +55,6 @@ export default function DesktopIcons() {
         label: "Properties",
         icon: Info,
         action: () => {
-           // Logic to open properties window for the app itself if needed
            console.log(`Properties for ${app.title}`);
         },
       },

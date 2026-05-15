@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useConfigStore } from "../../stores/configStore";
-import { Monitor, Shield, Info, Palette, Laptop, Bell, Search, ChevronRight } from "lucide-react";
+import { Shield, Info, Palette, Laptop, Bell, Search, ChevronRight } from "lucide-react";
 
 export default function SettingsApp() {
   const { wallpaper, setWallpaper } = useConfigStore();
