@@ -21,3 +21,11 @@ body {
   background: #09090b;
   font-family: Inter, sans-serif;
 }
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
