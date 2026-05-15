@@ -33,7 +33,14 @@ export default function DesktopIcons() {
                     app.defaultSize.height / 2,
                 },
 
+                isMaximized: false,
+
                 size: app.defaultSize,
+
+                minSize: {
+                  width: 420,
+                  height: 300,
+                },
               })
             }
             className="

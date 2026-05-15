@@ -69,6 +69,14 @@ export default function WindowManager() {
                   );
                 }
               }}
+              onResize={(updates) => {
+                useWindowStore
+                  .getState()
+                  .updateWindowSize(
+                    windowInstance.id,
+                    updates
+                  );
+              }}
             >
               <Component />
             </WindowFrame>

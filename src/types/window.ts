@@ -29,7 +29,19 @@ export interface WindowInstance {
 
   size: WindowSize;
 
-  previousPosition?: WindowPosition;
+  minSize?: {
+    width: number;
+    height: number;
+  };
 
-  previousSize?: WindowSize;
+  restoreBounds?: {
+    position: {
+      x: number;
+      y: number;
+    };
+    size: {
+      width: number;
+      height: number;
+    };
+  };
 }

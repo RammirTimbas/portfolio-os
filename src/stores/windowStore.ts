@@ -32,8 +32,12 @@ interface WindowStore {
 
   updateWindowSize: (
     id: string,
-    width: number,
-    height: number
+    updates: {
+      width?: number;
+      height?: number;
+      x?: number;
+      y?: number;
+    }
   ) => void;
 
   updateWindowPosition: (
@@ -151,27 +155,26 @@ export const useWindowStore = create<WindowStore>((set) => ({
       ),
     })),
 
-  updateWindowSize: (id, width, height) =>
-    set((state) => ({
-      windows: state.windows.map((window) =>
-        window.id === id
-          ? {
-              ...window,
+  updateWindowSize: (id, updates) =>
+  set((state) => ({
+    windows: state.windows.map((window) =>
+      window.id === id
+        ? {
+            ...window,
+            size: {
+              width: updates.width ?? window.size.width,
+              height: updates.height ?? window.size.height,
+            },
+            position: {
+              x: updates.x ?? window.position.x,
+              y: updates.y ?? window.position.y,
+            },
+          }
+        : window
+    ),
+  })),
 
-              size: {
-                width,
-                height,
-              },
-            }
-          : window
-      ),
-    })),
-
-  maximizeWindow: (
-  id,
-  viewportWidth,
-  viewportHeight
-) =>
+  maximizeWindow: (id, viewportWidth, viewportHeight) =>
   set((state) => ({
     windows: state.windows.map((window) => {
       if (window.id !== id) return window;
@@ -181,9 +184,11 @@ export const useWindowStore = create<WindowStore>((set) => ({
 
         isMaximized: true,
 
-        previousPosition: window.position,
-
-        previousSize: window.size,
+        // SAVE SNAPSHOT ONLY ONCE
+        restoreBounds: {
+          position: { ...window.position },
+          size: { ...window.size },
+        },
 
         position: {
           x: 0,
@@ -203,18 +208,18 @@ export const useWindowStore = create<WindowStore>((set) => ({
     windows: state.windows.map((window) => {
       if (window.id !== id) return window;
 
+      if (!window.restoreBounds) return window;
+
       return {
         ...window,
 
         isMaximized: false,
 
-        position:
-          window.previousPosition ??
-          window.position,
+        position: window.restoreBounds.position,
 
-        size:
-          window.previousSize ??
-          window.size,
+        size: window.restoreBounds.size,
+
+        restoreBounds: undefined,
       };
     }),
   })),
