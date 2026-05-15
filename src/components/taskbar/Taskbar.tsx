@@ -113,6 +113,7 @@ export default function Taskbar() {
             projects: "text-amber-400",
             terminal: "text-emerald-400",
             settings: "text-slate-400",
+            music: "text-purple-400",
             'project-viewer': "text-blue-500",
           };
 

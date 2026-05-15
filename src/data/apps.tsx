@@ -1,10 +1,11 @@
-import { Terminal, Layout, Settings, FolderKanban, Info, ShieldCheck } from "lucide-react";
+import { Terminal, Layout, Settings, FolderKanban, Info, ShieldCheck, Music } from "lucide-react";
 import AboutApp from "../components/apps/AboutApp";
 import WorkspaceApp from "../components/apps/WorkspaceApp";
 import ProjectViewer from "../components/apps/workspace/ProjectViewer";
 import ProjectProperties from "../components/apps/workspace/ProjectProperties";
 import SettingsApp from "../components/apps/SettingsApp";
 import TerminalApp from "../components/apps/TerminalApp";
+import MusicApp from "../components/apps/MusicApp";
 import type { AppDefinition } from "../types/app";
 
 export const apps: AppDefinition[] = [
@@ -45,6 +46,13 @@ export const apps: AppDefinition[] = [
     icon: Terminal,
     component: TerminalApp,
     defaultSize: { width: 600, height: 400 },
+  },
+  {
+    id: "music",
+    title: "Music",
+    icon: Music,
+    component: MusicApp,
+    defaultSize: { width: 900, height: 600 },
   },
   {
     id: "settings",
