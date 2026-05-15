@@ -1,12 +1,14 @@
 import { apps } from "../../data/apps";
 import { useWindowStore } from "../../stores/windowStore";
 import { useShellStore } from "../../stores/shellStore";
+import { useConfigStore } from "../../stores/configStore";
 import { Search, Power, Settings as SettingsIcon, ShieldCheck, AppWindow, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { profileData } from "../../data/profile";
 
 export default function StartMenu() {
   const { isStartMenuOpen, closeStartMenu } = useShellStore();
+  const { userName, reduceMotion, transparency } = useConfigStore();
   const openWindow = useWindowStore((state) => state.openWindow);
 
   const pinnedApps = apps.filter(app => !app.hideFromDesktop);
@@ -20,9 +22,16 @@ export default function StartMenu() {
         x: window.innerWidth / 2 - app.defaultSize.width / 2 + (Math.random() * 40),
         y: window.innerHeight / 2 - app.defaultSize.height / 2 + (Math.random() * 40),
       },
-      isMaximized: false,
+      isMaximized: app.defaultMaximized ?? false,
       size: app.defaultSize,
       minSize: { width: 420, height: 300 },
+      ...(app.defaultMaximized ? {
+        prevSize: app.defaultSize,
+        prevPosition: {
+          x: window.innerWidth / 2 - app.defaultSize.width / 2,
+          y: window.innerHeight / 2 - app.defaultSize.height / 2 - 32,
+        }
+      } : {})
     });
     closeStartMenu();
   };
@@ -33,11 +42,14 @@ export default function StartMenu() {
         <>
           <div className="fixed inset-0 z-[9998]" onClick={closeStartMenu} />
           <motion.div
-            initial={{ y: 300, opacity: 0, scale: 0.95 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 300, opacity: 0, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 left-1/2 z-[9999] h-[640px] w-[540px] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-3xl"
+            initial={reduceMotion ? { opacity: 0 } : { y: 300, opacity: 0, scale: 0.95 }}
+            animate={reduceMotion ? { opacity: 1 } : { y: 0, opacity: 1, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { y: 300, opacity: 0, scale: 0.95 }}
+            transition={reduceMotion ? { duration: 0.1 } : { type: "spring", damping: 25, stiffness: 300 }}
+            className={`
+              fixed bottom-20 left-1/2 z-[9999] h-[640px] w-[540px] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 p-8 shadow-2xl
+              ${transparency ? "bg-zinc-900/80 backdrop-blur-3xl" : "bg-zinc-900"}
+            `}
           >
             {/* Search Bar */}
             <div className="relative mb-8">
@@ -124,15 +136,28 @@ export default function StartMenu() {
                   <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-zinc-900" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors">{profileData.name}</span>
+                  <span className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors uppercase tracking-tight">
+                    {userName}
+                  </span>
                   <span className="text-[9px] text-zinc-500 font-mono">System Admin</span>
                 </div>
               </div>
               <div className="flex gap-1">
-                <button className="p-2 text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                <button
+                  onClick={() => {
+                    const settingsApp = apps.find(a => a.id === "settings");
+                    if (settingsApp) {
+                      handleOpenApp(settingsApp);
+                    }
+                  }}
+                  className="p-2 text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                >
                   <SettingsIcon size={16} />
                 </button>
-                <button className="p-2 text-zinc-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="p-2 text-zinc-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
+                >
                   <Power size={16} />
                 </button>
               </div>

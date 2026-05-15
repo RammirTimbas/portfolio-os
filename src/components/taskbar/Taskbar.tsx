@@ -2,8 +2,17 @@ import { apps } from "../../data/apps";
 import { useWindowStore } from "../../stores/windowStore";
 import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useShellStore } from "../../stores/shellStore";
+import { useConfigStore } from "../../stores/configStore";
 import { motion } from "framer-motion";
-import { Layout, Settings } from "lucide-react";
+import {
+  Layout,
+  Settings,
+  Wifi,
+  Volume2,
+  Battery,
+  ChevronUp
+} from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Taskbar() {
   const {
@@ -16,7 +25,27 @@ export default function Taskbar() {
   } = useWindowStore();
 
   const { toggleStartMenu } = useShellStore();
+  const { taskbarAlignment, showSeconds, transparency } = useConfigStore();
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
+
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    };
+    if (showSeconds) {
+      options.second = '2-digit';
+    }
+    return date.toLocaleTimeString([], options);
+  };
 
   const handleTaskbarContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,33 +80,8 @@ export default function Taskbar() {
     ]);
   };
 
-  return (
-    <div
-      onContextMenu={handleTaskbarContextMenu}
-      className="
-        absolute
-        bottom-4
-        left-1/2
-        z-[9999]
-        flex
-        h-14
-        -translate-x-1/2
-        items-center
-        gap-1
-        rounded-2xl
-        border
-        border-white/10
-        bg-zinc-900/40
-        px-2
-        py-1
-        backdrop-blur-2xl
-        shadow-2xl
-        min-w-[64px]
-        transition-all
-        duration-300
-      "
-    >
-      {/* Start Button */}
+  const appDockContent = (
+    <div className="flex items-center gap-1">
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -93,11 +97,9 @@ export default function Taskbar() {
         </div>
       </button>
 
-      {windows.length > 0 && (
-        <div className="mx-1 h-6 w-px shrink-0 bg-white/10" />
-      )}
+      <div className="mx-1 h-6 w-px shrink-0 bg-white/10" />
 
-      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[80vw]">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
         {windows.map((window) => {
           const app = apps.find((a) => a.id === window.appId);
           if (!app) return null;
@@ -130,14 +132,14 @@ export default function Taskbar() {
                 e.preventDefault();
                 e.stopPropagation();
                 openContextMenu(e.clientX, e.clientY - 60, [
-                   {
-                     label: isMinimized ? "Restore" : "Minimize",
-                     action: () => isMinimized ? restoreWindow(window.id) : minimizeWindow(window.id)
-                   },
-                   {
-                     label: "Close",
-                     action: () => useWindowStore.getState().closeWindow(window.id)
-                   }
+                  {
+                    label: isMinimized ? "Restore" : "Minimize",
+                    action: () => isMinimized ? restoreWindow(window.id) : minimizeWindow(window.id)
+                  },
+                  {
+                    label: "Close",
+                    action: () => useWindowStore.getState().closeWindow(window.id)
+                  }
                 ]);
               }}
               className={`
@@ -159,7 +161,6 @@ export default function Taskbar() {
                 <Icon size={24} strokeWidth={1.5} />
               </div>
 
-              {/* Indicator Bar */}
               <motion.div
                 layoutId={`indicator-${window.id}`}
                 className={`
@@ -173,14 +174,82 @@ export default function Taskbar() {
                   ${isFocused ? "w-4 opacity-100" : "w-1 opacity-60 group-hover:w-2"}
                 `}
               />
-              
-              {/* Tooltip */}
+
               <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none px-3 py-1 bg-zinc-800 border border-white/10 rounded-md text-xs text-white whitespace-nowrap shadow-xl z-[10000]">
                 {window.title}
               </div>
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div
+      onContextMenu={handleTaskbarContextMenu}
+      className={`
+        fixed
+        bottom-4
+        left-4
+        right-4
+        z-[9999]
+        grid
+        grid-cols-[1fr_auto_1fr]
+        h-14
+        items-center
+        rounded-2xl
+        border
+        border-white/10
+        px-2
+        py-1
+        shadow-2xl
+        transition-all
+        duration-500
+        ${transparency ? "bg-zinc-900/40 backdrop-blur-2xl" : "bg-zinc-900"}
+      `}
+    >
+      {/* 1. Left Section */}
+      <div className="flex items-center min-w-0 h-full">
+        {taskbarAlignment === 'left' && appDockContent}
+      </div>
+
+      {/* 2. Center Section */}
+      <div className="flex items-center justify-center min-w-0 h-full px-4 overflow-hidden">
+        {taskbarAlignment === 'center' && (
+          <div className="max-w-full overflow-hidden">
+             {appDockContent}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Right Section */}
+      <div className="flex items-center justify-end min-w-fit h-full">
+        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors cursor-default">
+             <ChevronUp size={14} className="text-zinc-500" />
+             <div className="flex items-center gap-2 text-zinc-400">
+               <Wifi size={14} />
+               <Volume2 size={14} />
+               <Battery size={14} />
+             </div>
+          </div>
+
+          <div className="flex flex-col items-end justify-center px-3 py-1 rounded-lg hover:bg-white/5 transition-colors cursor-default select-none border-l border-white/5 ml-1">
+            <span className="text-[11px] font-bold text-zinc-200 leading-none">
+              {formatTime(time)}
+            </span>
+            <span className="text-[9px] text-zinc-500 font-medium mt-0.5">
+              {time.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+          </div>
+
+          <div
+            className="w-1.5 h-6 border-l border-white/10 ml-1 hover:bg-white/5 transition-colors cursor-pointer"
+            onClick={() => minimizeAll()}
+            title="Show Desktop"
+          />
+        </div>
       </div>
     </div>
   );
