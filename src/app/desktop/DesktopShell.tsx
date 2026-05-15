@@ -6,7 +6,15 @@ import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useWindowStore } from "../../stores/windowStore";
 import { apps } from "../../data/apps";
 import { useConfigStore } from "../../stores/configStore";
-import { Monitor, RefreshCw, Image as ImageIcon } from "lucide-react";
+import {
+  Monitor,
+  RefreshCw,
+  Image as ImageIcon,
+  Layout,
+  Terminal,
+  User,
+  Settings as SettingsIcon
+} from "lucide-react";
 
 const wallpaperClasses = {
   default: "bg-[radial-gradient(circle_at_top,#27272a,transparent_60%)]",
@@ -17,34 +25,48 @@ const wallpaperClasses = {
 
 export default function DesktopShell() {
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
-  const openWindow = useWindowStore((state) => state.openWindow);
+  const { openWindow, minimizeAll, windows } = useWindowStore();
   const { wallpaper, setWallpaper } = useConfigStore();
+
+  const handleOpenApp = (appId: string) => {
+    const app = apps.find(a => a.id === appId);
+    if (app) {
+      openWindow({
+        id: crypto.randomUUID(),
+        appId: app.id,
+        title: app.title,
+        position: {
+          x: window.innerWidth / 2 - app.defaultSize.width / 2 + (windows.length * 20),
+          y: window.innerHeight / 2 - app.defaultSize.height / 2 + (windows.length * 20),
+        },
+        isMaximized: false,
+        size: app.defaultSize,
+        minSize: { width: 420, height: 300 },
+      });
+    }
+  };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
 
     const menuItems = [
       {
-        label: "Open Settings",
-        icon: Monitor,
-        action: () => {
-          const settingsApp = apps.find(a => a.id === "settings");
-          if (settingsApp) {
-            openWindow({
-              id: crypto.randomUUID(),
-              appId: settingsApp.id,
-              title: settingsApp.title,
-              position: {
-                x: window.innerWidth / 2 - settingsApp.defaultSize.width / 2,
-                y: window.innerHeight / 2 - settingsApp.defaultSize.height / 2,
-              },
-              isMaximized: false,
-              size: settingsApp.defaultSize,
-              minSize: { width: 420, height: 300 },
-            });
-          }
-        }
+        label: "Show Desktop",
+        icon: Layout,
+        action: () => minimizeAll()
       },
+      { divider: true },
+      {
+        label: "Open Terminal",
+        icon: Terminal,
+        action: () => handleOpenApp("terminal")
+      },
+      {
+        label: "About Me",
+        icon: User,
+        action: () => handleOpenApp("about")
+      },
+      { divider: true },
       {
         label: "Next Wallpaper",
         icon: ImageIcon,
@@ -55,9 +77,14 @@ export default function DesktopShell() {
           setWallpaper(keys[nextIndex]);
         }
       },
+      {
+        label: "Settings",
+        icon: SettingsIcon,
+        action: () => handleOpenApp("settings")
+      },
       { divider: true },
       {
-        label: "Refresh",
+        label: "Refresh System",
         icon: RefreshCw,
         action: () => window.location.reload()
       }
@@ -71,7 +98,7 @@ export default function DesktopShell() {
       className="relative h-screen w-screen overflow-hidden bg-zinc-950"
       onContextMenu={handleContextMenu}
     >
-      <div className={`absolute inset-0 transition-colors duration-700 ${wallpaperClasses[wallpaper as keyof typeof wallpaperClasses] || wallpaperClasses.default}`} />
+      <div className={`absolute inset-0 transition-colors duration-1000 ${wallpaperClasses[wallpaper as keyof typeof wallpaperClasses] || wallpaperClasses.default}`} />
 
       <DesktopIcons />
 

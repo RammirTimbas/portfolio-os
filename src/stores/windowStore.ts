@@ -1,228 +1,129 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import type { WindowInstance } from "../types/window";
+interface WindowState {
+  id: string;
+  appId: string;
+  title: string;
+  isFocused: boolean;
+  isMinimized: boolean;
+  isMaximized: boolean;
+  zIndex: number;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  minSize: { width: number; height: number };
+  prevSize?: { width: number; height: number };
+  prevPosition?: { x: number; y: number };
+}
 
 interface WindowStore {
-  windows: WindowInstance[];
-
-  highestZ: number;
-
-  openWindow: (
-    window: Omit<
-      WindowInstance,
-      "zIndex" | "isFocused" | "isOpen" | "isMinimized"
-    >
-  ) => void;
-
+  windows: WindowState[];
+  maxZIndex: number;
+  openWindow: (window: Omit<WindowState, 'isFocused' | 'isMinimized' | 'zIndex'>) => void;
   closeWindow: (id: string) => void;
-
   focusWindow: (id: string) => void;
-
   minimizeWindow: (id: string) => void;
-
   restoreWindow: (id: string) => void;
-
-  maximizeWindow: (
-    id: string,
-    viewportWidth: number,
-    viewportHeight: number
-  ) => void;
-
+  maximizeWindow: (id: string, width: number, height: number) => void;
   restoreMaximizedWindow: (id: string) => void;
-
-  updateWindowSize: (
-    id: string,
-    updates: {
-      width?: number;
-      height?: number;
-      x?: number;
-      y?: number;
-    }
-  ) => void;
-
-  updateWindowPosition: (
-    id: string,
-    x: number,
-    y: number
-  ) => void;
+  updateWindowSize: (id: string, updates: { width?: number; height?: number; x?: number; y?: number }) => void;
+  minimizeAll: () => void;
 }
 
 export const useWindowStore = create<WindowStore>((set) => ({
   windows: [],
+  maxZIndex: 10,
 
-  highestZ: 1,
-
-  openWindow: (window) =>
-    set((state) => {
-      const nextZ = state.highestZ + 1;
-
+  openWindow: (windowData) => set((state) => {
+    const exists = state.windows.find(w => w.appId === windowData.appId);
+    if (exists) {
       return {
-        highestZ: nextZ,
-
-        windows: [
-          ...state.windows.map((w) => ({
-            ...w,
-            isFocused: false,
-          })),
-
-          {
-            ...window,
-
-            zIndex: nextZ,
-
-            isFocused: true,
-
-            isOpen: true,
-
-            isMinimized: false,
-          },
-        ],
+        windows: state.windows.map(w =>
+          w.appId === windowData.appId
+            ? { ...w, isFocused: true, isMinimized: false, zIndex: state.maxZIndex + 1 }
+            : { ...w, isFocused: false }
+        ),
+        maxZIndex: state.maxZIndex + 1
       };
-    }),
+    }
+    return {
+      windows: [
+        ...state.windows.map(w => ({ ...w, isFocused: false })),
+        { ...windowData, isFocused: true, isMinimized: false, zIndex: state.maxZIndex + 1 }
+      ],
+      maxZIndex: state.maxZIndex + 1
+    };
+  }),
 
-  closeWindow: (id) =>
-    set((state) => ({
-      windows: state.windows.filter((w) => w.id !== id),
-    })),
+  closeWindow: (id) => set((state) => ({
+    windows: state.windows.filter((w) => w.id !== id),
+  })),
 
-  focusWindow: (id) =>
-    set((state) => {
-      const nextZ = state.highestZ + 1;
+  focusWindow: (id) => set((state) => ({
+    windows: state.windows.map((w) =>
+      w.id === id ? { ...w, isFocused: true, zIndex: state.maxZIndex + 1 } : { ...w, isFocused: false }
+    ),
+    maxZIndex: state.maxZIndex + 1,
+  })),
 
-      return {
-        highestZ: nextZ,
-
-        windows: state.windows.map((window) => ({
-          ...window,
-
-          isFocused: window.id === id,
-
-          zIndex:
-            window.id === id
-              ? nextZ
-              : window.zIndex,
-        })),
-      };
-    }),
-
-  minimizeWindow: (id) =>
-    set((state) => ({
-      windows: state.windows.map((window) =>
-        window.id === id
-          ? {
-              ...window,
-              isMinimized: true,
-              isFocused: false,
-            }
-          : window
-      ),
-    })),
-
-  restoreWindow: (id) =>
-    set((state) => {
-      const nextZ = state.highestZ + 1;
-
-      return {
-        highestZ: nextZ,
-
-        windows: state.windows.map((window) => ({
-          ...window,
-
-          isMinimized:
-            window.id === id
-              ? false
-              : window.isMinimized,
-
-          isFocused: window.id === id,
-
-          zIndex:
-            window.id === id
-              ? nextZ
-              : window.zIndex,
-        })),
-      };
-    }),
-
-  updateWindowPosition: (id, x, y) =>
-    set((state) => ({
-      windows: state.windows.map((window) =>
-        window.id === id
-          ? {
-              ...window,
-              position: { x, y },
-            }
-          : window
-      ),
-    })),
-
-  updateWindowSize: (id, updates) =>
-  set((state) => ({
-    windows: state.windows.map((window) =>
-      window.id === id
-        ? {
-            ...window,
-            size: {
-              width: updates.width ?? window.size.width,
-              height: updates.height ?? window.size.height,
-            },
-            position: {
-              x: updates.x ?? window.position.x,
-              y: updates.y ?? window.position.y,
-            },
-          }
-        : window
+  minimizeWindow: (id) => set((state) => ({
+    windows: state.windows.map((w) =>
+      w.id === id ? { ...w, isMinimized: true, isFocused: false } : w
     ),
   })),
 
-  maximizeWindow: (id, viewportWidth, viewportHeight) =>
-  set((state) => ({
-    windows: state.windows.map((window) => {
-      if (window.id !== id) return window;
+  restoreWindow: (id) => set((state) => ({
+    windows: state.windows.map((w) =>
+      w.id === id ? { ...w, isMinimized: false, isFocused: true, zIndex: state.maxZIndex + 1 } : { ...w, isFocused: false }
+    ),
+    maxZIndex: state.maxZIndex + 1,
+  })),
 
+  maximizeWindow: (id, screenWidth, screenHeight) => set((state) => ({
+    windows: state.windows.map((w) =>
+      w.id === id
+        ? {
+            ...w,
+            isMaximized: true,
+            prevPosition: w.position,
+            prevSize: w.size,
+            position: { x: 0, y: 0 },
+            size: { width: screenWidth, height: screenHeight - 64 }, // Offset for taskbar
+          }
+        : w
+    ),
+  })),
+
+  restoreMaximizedWindow: (id) => set((state) => ({
+    windows: state.windows.map((w) =>
+      w.id === id
+        ? {
+            ...w,
+            isMaximized: false,
+            position: w.prevPosition || w.position,
+            size: w.prevSize || w.size,
+          }
+        : w
+    ),
+  })),
+
+  updateWindowSize: (id, updates) => set((state) => ({
+    windows: state.windows.map((w) => {
+      if (w.id !== id) return w;
       return {
-        ...window,
-
-        isMaximized: true,
-
-        // SAVE SNAPSHOT ONLY ONCE
-        restoreBounds: {
-          position: { ...window.position },
-          size: { ...window.size },
-        },
-
+        ...w,
         position: {
-          x: 0,
-          y: 0,
+          x: updates.x !== undefined ? updates.x : w.position.x,
+          y: updates.y !== undefined ? updates.y : w.position.y,
         },
-
         size: {
-          width: viewportWidth,
-          height: viewportHeight - 48,
+          width: updates.width !== undefined ? updates.width : w.size.width,
+          height: updates.height !== undefined ? updates.height : w.size.height,
         },
       };
     }),
   })),
 
-  restoreMaximizedWindow: (id) =>
-  set((state) => ({
-    windows: state.windows.map((window) => {
-      if (window.id !== id) return window;
-
-      if (!window.restoreBounds) return window;
-
-      return {
-        ...window,
-
-        isMaximized: false,
-
-        position: window.restoreBounds.position,
-
-        size: window.restoreBounds.size,
-
-        restoreBounds: undefined,
-      };
-    }),
+  minimizeAll: () => set((state) => ({
+    windows: state.windows.map((w) => ({ ...w, isMinimized: true, isFocused: false }))
   })),
-  
-
 }));

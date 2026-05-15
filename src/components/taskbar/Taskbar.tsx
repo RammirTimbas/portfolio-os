@@ -1,6 +1,8 @@
 import { apps } from "../../data/apps";
 import { useWindowStore } from "../../stores/windowStore";
+import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { motion } from "framer-motion";
+import { Layout, Settings, Monitor } from "lucide-react";
 
 export default function Taskbar() {
   const {
@@ -8,10 +10,48 @@ export default function Taskbar() {
     restoreWindow,
     focusWindow,
     minimizeWindow,
+    minimizeAll,
+    openWindow,
   } = useWindowStore();
+
+  const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
+
+  const handleTaskbarContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openContextMenu(e.clientX, e.clientY - 100, [ // Offset upwards
+      {
+        label: "Show Desktop",
+        icon: Layout,
+        action: () => minimizeAll(),
+      },
+      { divider: true },
+      {
+        label: "Taskbar Settings",
+        icon: Settings,
+        action: () => {
+          const settingsApp = apps.find(a => a.id === "settings");
+          if (settingsApp) {
+            openWindow({
+              id: crypto.randomUUID(),
+              appId: settingsApp.id,
+              title: settingsApp.title,
+              position: {
+                x: window.innerWidth / 2 - settingsApp.defaultSize.width / 2,
+                y: window.innerHeight / 2 - settingsApp.defaultSize.height / 2,
+              },
+              isMaximized: false,
+              size: settingsApp.defaultSize,
+              minSize: { width: 420, height: 300 },
+            });
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <div
+      onContextMenu={handleTaskbarContextMenu}
       className="
         absolute
         bottom-4
@@ -58,7 +98,6 @@ export default function Taskbar() {
           const isMinimized = window.isMinimized;
           const Icon = app.icon;
 
-          // Custom colors for Win11 like look
           const iconColors: Record<string, string> = {
             about: "text-blue-400",
             projects: "text-amber-400",
@@ -77,6 +116,20 @@ export default function Taskbar() {
                 } else {
                   focusWindow(window.id);
                 }
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openContextMenu(e.clientX, e.clientY - 60, [
+                   {
+                     label: isMinimized ? "Restore" : "Minimize",
+                     action: () => isMinimized ? restoreWindow(window.id) : minimizeWindow(window.id)
+                   },
+                   {
+                     label: "Close",
+                     action: () => useWindowStore.getState().closeWindow(window.id)
+                   }
+                ]);
               }}
               className={`
                 group
