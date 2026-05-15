@@ -9,7 +9,6 @@ export default function DesktopIcons() {
   const windows = useWindowStore((state) => state.windows);
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
 
-  // Filter out utility windows from the desktop
   const desktopApps = apps.filter(app => !app.hideFromDesktop);
 
   const handleOpenApp = (app: AppDefinition) => {
@@ -30,7 +29,6 @@ export default function DesktopIcons() {
         width: 420,
         height: 300,
       },
-      // Provide restore state if it opens maximized
       ...(app.defaultMaximized ? {
         prevSize: app.defaultSize,
         prevPosition: {
@@ -62,7 +60,7 @@ export default function DesktopIcons() {
   };
 
   return (
-    <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,100px)] gap-2 p-4 h-full pointer-events-none">
+    <div className="grid grid-flow-col grid-rows-[repeat(auto-fill,110px)] gap-4 p-6 h-full pb-32 pointer-events-none">
       {desktopApps.map((app) => {
         const Icon = app.icon;
         const iconColors: Record<string, string> = {
@@ -70,6 +68,7 @@ export default function DesktopIcons() {
           projects: "from-amber-400 to-orange-500",
           terminal: "from-zinc-700 to-zinc-900",
           settings: "from-slate-400 to-slate-600",
+          music: "from-purple-500 to-indigo-600",
         };
 
         return (
@@ -86,36 +85,40 @@ export default function DesktopIcons() {
               flex-col
               items-center
               justify-center
-              gap-1
-              rounded-lg
+              gap-2
+              rounded-2xl
               hover:bg-white/10
-              transition-colors
+              transition-all
+              duration-300
               focus:outline-none
               focus:bg-white/10
+              active:scale-95
             "
           >
             <div
               className={`
                 relative
                 flex
-                h-14
-                w-14
+                h-16
+                w-16
                 items-center
                 justify-center
-                rounded-xl
+                rounded-[1.25rem]
                 bg-gradient-to-br
                 ${iconColors[app.id] || "from-zinc-700 to-zinc-800"}
-                shadow-lg
-                transition-transform
-                group-hover:scale-105
-                group-active:scale-95
+                shadow-xl
+                transition-all
+                duration-500
+                group-hover:scale-110
+                group-hover:rotate-3
+                group-active:scale-90
               `}
             >
-              <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Icon className="text-white drop-shadow-md" size={32} strokeWidth={1.5} />
+              <div className="absolute inset-0 bg-white/10 rounded-[1.25rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Icon className="text-white drop-shadow-2xl" size={32} strokeWidth={1.5} />
             </div>
 
-            <span className="text-[11px] font-medium text-white drop-shadow-lg text-center px-1 truncate w-full">
+            <span className="text-[11px] font-bold text-white drop-shadow-2xl text-center px-1 truncate w-full tracking-tight opacity-80 group-hover:opacity-100">
               {app.title}
             </span>
           </button>

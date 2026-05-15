@@ -35,7 +35,6 @@ export default function WindowFrame({
   onMaximize,
   onResize,
 }: Props) {
-  // Track interaction state in refs to avoid closure staleness in global listeners
   const stateRef = useRef({
     position,
     size,
@@ -50,7 +49,6 @@ export default function WindowFrame({
     }
   });
 
-  // Keep refs in sync with latest props
   useEffect(() => {
     stateRef.current.position = position;
     stateRef.current.size = size;
@@ -97,7 +95,6 @@ export default function WindowFrame({
     direction: "right" | "bottom" | "corner" = "right"
   ) => {
     if (e.button !== 0) return;
-
     e.preventDefault();
     e.stopPropagation();
 
@@ -117,7 +114,6 @@ export default function WindowFrame({
     window.addEventListener("pointerup", handleGlobalPointerUp);
   };
 
-  // Cleanup listeners if the component unmounts
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handleGlobalPointerMove);
@@ -125,14 +121,22 @@ export default function WindowFrame({
     };
   }, [handleGlobalPointerMove, handleGlobalPointerUp]);
 
+  // Modern Inset Maximization Constants
+  const MARGIN = 12;
+  const TASKBAR_RESERVE = 100; // Height reserved for the floating taskbar gap
+
   return (
     <motion.div
+      initial={false}
+      animate={{
+        left: isMaximized ? MARGIN : position.x,
+        top: isMaximized ? MARGIN : position.y,
+        width: isMaximized ? `calc(100% - ${MARGIN * 2}px)` : size.width,
+        height: isMaximized ? `calc(100% - ${TASKBAR_RESERVE}px)` : size.height,
+      }}
+      transition={{ type: "spring", damping: 25, stiffness: 300 }}
       style={{
         position: "absolute",
-        left: isMaximized ? 0 : position.x,
-        top: isMaximized ? 0 : position.y,
-        width: isMaximized ? "100%" : size.width,
-        height: isMaximized ? "100%" : size.height,
         zIndex,
         display: isMinimized ? "none" : "flex",
         flexDirection: "column",
@@ -140,11 +144,13 @@ export default function WindowFrame({
       onMouseDown={onMouseDown}
       className={`
         overflow-hidden
-        backdrop-blur-xl
-        bg-zinc-900/80
-        transition-[border-radius,border-width] duration-300
-        ${isMaximized ? "border-0 rounded-none shadow-none" : "border rounded-2xl shadow-2xl"}
-        ${isFocused ? "border-zinc-500" : "border-zinc-800"}
+        backdrop-blur-2xl
+        bg-zinc-900/90
+        border
+        rounded-2xl
+        shadow-2xl
+        transition-colors duration-300
+        ${isFocused ? "border-zinc-500/50 shadow-blue-500/10" : "border-white/5"}
       `}
     >
       {!isMaximized && (
@@ -170,6 +176,7 @@ export default function WindowFrame({
           if ((e.target as HTMLElement).closest("button")) return;
           startInteraction(e, "drag");
         }}
+        onDoubleClick={onMaximize}
         className={`
           flex
           h-12
@@ -177,43 +184,43 @@ export default function WindowFrame({
           items-center
           justify-between
           border-b
-          border-zinc-800
+          border-white/5
           px-4
           relative
           z-10
           ${isMaximized ? "cursor-default" : "cursor-move"}
         `}
       >
-        <span className="text-sm font-medium text-white truncate mr-4 pointer-events-none select-none">
+        <span className="text-xs font-black text-zinc-400 uppercase tracking-widest truncate mr-4 pointer-events-none select-none">
           {title}
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onMinimize(); }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-all active:scale-90"
           >
-            <Minus size={16} />
+            <Minus size={14} />
           </button>
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onMaximize(); }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-all active:scale-90"
           >
-            <Square size={14} />
+            <Square size={12} />
           </button>
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-red-500/80 text-zinc-400 hover:text-white transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-red-500/20 hover:text-red-400 text-zinc-400 transition-all active:scale-90"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto relative z-0">
+      <div className="flex-1 overflow-auto relative z-0 no-scrollbar">
         {children}
       </div>
     </motion.div>
