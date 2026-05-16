@@ -81,7 +81,7 @@ export default function Taskbar() {
   };
 
   const appDockContent = (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 overflow-hidden h-full">
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -99,7 +99,7 @@ export default function Taskbar() {
 
       <div className="mx-1 h-6 w-px shrink-0 bg-white/10" />
 
-      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1 overflow-hidden h-full">
         {windows.map((window) => {
           const app = apps.find((a) => a.id === window.appId);
           if (!app) return null;
@@ -207,11 +207,13 @@ export default function Taskbar() {
         shadow-2xl
         transition-all
         duration-500
-        ${transparency ? "bg-zinc-900/40 backdrop-blur-2xl" : "bg-zinc-900"}
+        overflow-hidden
+        select-none
+        ${transparency ? "bg-zinc-950/40 backdrop-blur-2xl" : "bg-zinc-950"}
       `}
     >
       {/* 1. Left Section */}
-      <div className="flex items-center min-w-0 h-full">
+      <div className="flex items-center min-w-0 h-full overflow-hidden">
         {taskbarAlignment === 'left' && appDockContent}
       </div>
 
@@ -225,7 +227,7 @@ export default function Taskbar() {
       </div>
 
       {/* 3. Right Section */}
-      <div className="flex items-center justify-end min-w-fit h-full">
+      <div className="flex items-center justify-end min-w-fit h-full overflow-hidden">
         <div className="flex items-center gap-1">
           <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors cursor-default">
              <ChevronUp size={14} className="text-zinc-500" />
