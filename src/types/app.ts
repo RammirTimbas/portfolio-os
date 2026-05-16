@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 export interface AppProps {
   params?: any;
   windowId?: string;
+  isMobile?: boolean;
 }
 
 export interface AppDefinition {

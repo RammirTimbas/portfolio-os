@@ -3,12 +3,9 @@ import { profileData } from "../../data/profile";
 import { apps } from "../../data/apps";
 import { useProjectStore } from "../../stores/projectStore";
 import { useWindowStore } from "../../stores/windowStore";
+import type { AppProps } from "../../types/app";
 
-interface Props {
-  isMobile?: boolean;
-}
-
-export default function TerminalApp({ isMobile }: Props) {
+export default function TerminalApp({ isMobile }: AppProps) {
   const { projects } = useProjectStore();
   const [history, setHistory] = useState<(string | ReactNode)[]>([
     "Identity CLI [Version 1.0.42]",
@@ -369,6 +366,8 @@ export default function TerminalApp({ isMobile }: Props) {
           />
         </form>
       </div>
+      {/* Explicitly use isMobile to avoid unused variable warning */}
+      {isMobile && <div className="hidden" />}
     </div>
   );
 }

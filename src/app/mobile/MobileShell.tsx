@@ -15,7 +15,7 @@ const wallpaperClasses = {
 
 export default function MobileShell() {
   const { wallpaper } = useConfigStore();
-  const { windows, closeWindow, focusWindow } = useWindowStore();
+  const { windows, closeWindow } = useWindowStore();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function MobileShell() {
                   const app = apps.find(a => a.id === activeWindow.appId);
                   if (!app) return null;
                   const Component = app.component;
-                  return <Component params={activeWindow.params} windowId={activeWindow.id} isMobile />;
+                  return <Component params={activeWindow.params} windowId={activeWindow.id} isMobile={true} />;
                 })()}
               </div>
             </motion.div>

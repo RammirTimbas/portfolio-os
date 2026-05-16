@@ -102,8 +102,8 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
   // Logic for container-based responsiveness
   const appWidth = currentWindow?.size.width || 800;
   const appHeight = currentWindow?.size.height || 600;
-  const isCompact = appWidth < 800 || isMobileProp;
-  const isMobile = appWidth < 500 || isMobileProp;
+  const isCompact = appWidth < 800 || !!isMobileProp;
+  const isMobile = appWidth < 500 || !!isMobileProp;
   const isShort = appHeight < 500;
 
   // Load YouTube API
@@ -315,7 +315,7 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
                <div className="w-10 h-10 md:w-11 md:h-11 bg-gradient-to-br from-zinc-200 to-zinc-500 rounded-2xl flex items-center justify-center shadow-xl shrink-0">
                   <Music size={24} className="text-black" />
                </div>
-               {(!isCompact || isMobileProp) && (
+               {(!isCompact || !!isMobileProp) && (
                  <div className="flex flex-col">
                     <span className="font-black text-lg tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500">Identity</span>
                     <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">Music OS</span>
@@ -325,14 +325,14 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
 
             <nav className="space-y-6 md:space-y-8 shrink-0">
               <div className="space-y-1">
-                {(!isCompact || isMobileProp) && <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-4 mb-3">Discovery</p>}
-                <SidebarItem icon={<LayoutGrid size={18} />} label="Home" active={currentView === 'home'} onClick={() => handleSidebarSelect('home')} isCompact={isCompact && !isMobileProp} />
-                <SidebarItem icon={<Search size={18} />} label="Browse" active={currentView === 'browse'} onClick={() => handleSidebarSelect('browse')} isCompact={isCompact && !isMobileProp} />
+                {(!isCompact || !!isMobileProp) && <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-4 mb-3">Discovery</p>}
+                <SidebarItem icon={<LayoutGrid size={18} />} label="Home" active={currentView === 'home'} onClick={() => handleSidebarSelect('home')} isCompact={!!isCompact && !isMobileProp} />
+                <SidebarItem icon={<Search size={18} />} label="Browse" active={currentView === 'browse'} onClick={() => handleSidebarSelect('browse')} isCompact={!!isCompact && !isMobileProp} />
               </div>
 
               <div className="space-y-1">
-                {(!isCompact || isMobileProp) && <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-4 mb-3">Library</p>}
-                <SidebarItem icon={<Heart size={18} fill={currentView === 'liked' ? "currentColor" : "none"} />} label="Liked" active={currentView === 'liked'} onClick={() => handleSidebarSelect('liked')} isCompact={isCompact && !isMobileProp} />
+                {(!isCompact || !!isMobileProp) && <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-4 mb-3">Library</p>}
+                <SidebarItem icon={<Heart size={18} fill={currentView === 'liked' ? "currentColor" : "none"} />} label="Liked" active={currentView === 'liked'} onClick={() => handleSidebarSelect('liked')} isCompact={!!isCompact && !isMobileProp} />
               </div>
             </nav>
           </div>
@@ -401,6 +401,7 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
                                 <th className="py-4 md:py-5 px-4 md:px-6 text-left font-medium">Title</th>
                                 {!isMobile && <th className="py-4 md:py-5 px-4 md:px-6 text-left font-medium hidden sm:table-cell">Album</th>}
                                 <th className="py-4 md:py-5 px-4 md:px-6 w-16 md:w-28 text-right font-medium">Time</th>
+                                <th className="py-4 md:py-5 px-4 md:px-6 w-12 md:w-16"></th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-white/0">
@@ -428,9 +429,17 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
                                   </td>
                                   {!isMobile && <td className="py-4 md:py-6 px-4 md:px-6 text-xs md:text-sm text-zinc-400 font-bold tracking-tight hidden sm:table-cell truncate">{song.album}</td>}
                                   <td className="py-4 md:py-6 px-4 md:px-6 text-right font-mono text-[10px] md:text-xs text-zinc-500 font-bold shrink-0">{formatTime(song.duration)}</td>
+                                  <td className="py-4 md:py-6 px-4 md:px-6 shrink-0 text-right">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); toggleLike(song.id); }}
+                                      className={`transition-all duration-300 ${likedSongs.includes(song.id) ? 'text-blue-500 scale-110' : 'text-zinc-700 opacity-0 group-hover:opacity-100 hover:text-white'}`}
+                                    >
+                                      <Heart size={18} fill={likedSongs.includes(song.id) ? "currentColor" : "none"} />
+                                    </button>
+                                  </td>
                                 </tr>
                               ))}
-                              <tr className="h-24"><td colSpan={isMobile ? 3 : 4}></td></tr>
+                              <tr className="h-24"><td colSpan={isMobile ? 4 : 5}></td></tr>
                             </tbody>
                           </table>
                         </div>
@@ -442,7 +451,6 @@ export default function MusicApp({ windowId, isMobile: isMobileProp }: Props) {
         </main>
       </div>
 
-      {/* Bottom Player Bar */}
       <footer className={`${isMobileProp ? 'h-20' : 'h-32'} bg-black border-t border-white/5 px-4 md:px-6 lg:px-12 flex items-center justify-between gap-4 shrink-0 relative z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] transition-all`}>
         <div className={`flex items-center gap-3 md:gap-4 ${isCompact ? 'w-10 md:w-16' : 'flex-1 min-w-0'} overflow-hidden`}>
           <div className="relative group overflow-hidden rounded-lg md:rounded-2xl shadow-2xl border border-white/10 shrink-0">

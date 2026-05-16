@@ -31,6 +31,8 @@ export default function ProjectViewer({ params, isMobile }: Props) {
           y: window.innerHeight / 2 - 384 + (Math.random() * 20),
         },
         size: { width: 1024, height: 768 },
+        isMaximized: false,
+        minSize: { width: 420, height: 300 },
         params: { url: project.demo, title: project.title }
       });
     }
@@ -56,7 +58,7 @@ export default function ProjectViewer({ params, isMobile }: Props) {
                project.status === 'completed'
                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                  : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-             }`}>
+           }`}>
                <div className={`h-1 w-1 rounded-full ${project.status === 'completed' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
                {project.status.toUpperCase()}
              </span>

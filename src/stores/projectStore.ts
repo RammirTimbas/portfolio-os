@@ -41,15 +41,15 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
           const name = repo.name.toLowerCase();
           const lang = repo.language?.toLowerCase() || '';
 
-          const isWeb = topics.some(t => ['webapp', 'frontend', 'website', 'react', 'nextjs', 'vue', 'tailwind'].includes(t)) ||
+          const isWeb = topics.some((t: string) => ['webapp', 'frontend', 'website', 'react', 'nextjs', 'vue', 'tailwind'].includes(t)) ||
                         ['typescript', 'javascript', 'html'].includes(lang) ||
                         name.includes('web') || name.includes('site');
 
-          const isAPI = topics.some(t => ['api', 'backend', 'server', 'microservice', 'database'].includes(t)) ||
+          const isAPI = topics.some((t: string) => ['api', 'backend', 'server', 'microservice', 'database'].includes(t)) ||
                         ['go', 'python', 'rust', 'java'].includes(lang) ||
                         name.includes('api') || name.includes('backend');
 
-          const isUI = topics.some(t => ['ui', 'design', 'components', 'css', 'ux'].includes(t)) ||
+          const isUI = topics.some((t: string) => ['ui', 'design', 'components', 'css', 'ux'].includes(t)) ||
                        name.includes('ui') || name.includes('theme');
 
           if (isWeb) inferredCategory = 'web';

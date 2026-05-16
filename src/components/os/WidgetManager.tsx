@@ -1,6 +1,6 @@
 import { useDesktopStore } from "../../stores/desktopStore";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
-import { Clock as ClockIcon, StickyNote as StickyNoteIcon, Calendar as CalendarIcon, X, CloudSun, Zap, Cpu, GripVertical, Cloud, CloudRain, Sun, Snowflake, MapPin, Loader2, Thermometer, MoveDiagonal2 } from "lucide-react";
+import {  Calendar as CalendarIcon, X, CloudSun, Zap, Cpu, GripVertical, Cloud, CloudRain, Sun, Snowflake, MapPin, Loader2, MoveDiagonal2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -49,7 +49,6 @@ function WidgetRenderer({ widget, onPositionChange, onSizeChange, onContentChang
     <motion.div
       drag={!isResizing}
       dragMomentum={false}
-      dragHandleClassName="drag-handle"
       onDragStart={() => {
         setIsDragging(true);
         setIsFocused(true);

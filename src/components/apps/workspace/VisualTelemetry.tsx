@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Activity, Cpu, Database, Zap } from "lucide-react";
 
 export default function VisualTelemetry() {

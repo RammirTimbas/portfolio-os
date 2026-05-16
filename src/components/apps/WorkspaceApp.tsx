@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { useProjectSelection } from "../../hooks/useProjectSelection";
 import ProjectGrid from "./workspace/ProjectGrid";
 import ProjectDetails from "./workspace/ProjectDetails";
@@ -10,7 +10,6 @@ import {
   List,
   Terminal as TerminalIcon,
   Loader2,
-  Code2,
   RefreshCw,
   ChevronLeft,
   Filter
@@ -53,6 +52,8 @@ export default function WorkspaceApp({ isMobile }: Props) {
           y: window.innerHeight / 2 - 384 + (Math.random() * 20),
         },
         size: { width: 1024, height: 768 },
+        isMaximized: false,
+        minSize: { width: 400, height: 300 },
         params: { url: project.demo, title: project.title }
       });
     } else if (project.github) {
