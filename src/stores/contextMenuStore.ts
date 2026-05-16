@@ -5,6 +5,7 @@ export interface ContextMenuItem {
   label?: string;
   action?: () => void;
   icon?: any;
+  children?: ContextMenuItem[];
 }
 
 interface ContextMenuState {

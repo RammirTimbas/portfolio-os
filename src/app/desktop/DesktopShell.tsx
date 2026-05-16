@@ -3,8 +3,10 @@ import WindowManager from "../../components/os/WindowManager";
 import Taskbar from "../../components/taskbar/Taskbar";
 import ContextMenu from "../../components/os/ContextMenu";
 import StartMenu from "../../components/os/StartMenu";
+import WidgetManager from "../../components/os/WidgetManager";
 import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useWindowStore } from "../../stores/windowStore";
+import { useDesktopStore } from "../../stores/desktopStore";
 import { apps } from "../../data/apps";
 import { useConfigStore } from "../../stores/configStore";
 import { useEffect } from "react";
@@ -15,7 +17,13 @@ import {
   Terminal,
   ShieldCheck,
   Settings as SettingsIcon,
-  AppWindow
+  AppWindow,
+  Plus,
+  Clock,
+  StickyNote,
+  Calendar,
+  CloudSun,
+  Cpu
 } from "lucide-react";
 
 const wallpaperClasses = {
@@ -28,7 +36,8 @@ const wallpaperClasses = {
 export default function DesktopShell() {
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
   const { openWindow, minimizeAll } = useWindowStore();
-  const { wallpaper, setWallpaper } = useConfigStore();
+  const { wallpaper, setWallpaper, defaultNoteContent } = useConfigStore();
+  const { addWidget } = useDesktopStore();
 
   useEffect(() => {
     // Fresh launch key to ensure it triggers for you
@@ -94,6 +103,42 @@ export default function DesktopShell() {
       },
       { divider: true },
       {
+        label: "Add Widget",
+        icon: Plus,
+        children: [
+          {
+            label: "Clock",
+            icon: Clock,
+            action: () => addWidget({ type: 'clock', position: { x: e.clientX, y: e.clientY } })
+          },
+          {
+            label: "Sticky Note",
+            icon: StickyNote,
+            action: () => addWidget({
+              type: 'sticky-note',
+              position: { x: e.clientX, y: e.clientY },
+              content: defaultNoteContent
+            })
+          },
+          {
+            label: "Calendar",
+            icon: Calendar,
+            action: () => addWidget({ type: 'calendar', position: { x: e.clientX, y: e.clientY } })
+          },
+          {
+            label: "Weather",
+            icon: CloudSun,
+            action: () => addWidget({ type: 'weather', position: { x: e.clientX, y: e.clientY } })
+          },
+          {
+            label: "Performance",
+            icon: Cpu,
+            action: () => addWidget({ type: 'performance', position: { x: e.clientX, y: e.clientY } })
+          }
+        ]
+      },
+      { divider: true },
+      {
         label: "Open Workspace",
         icon: AppWindow,
         action: () => handleOpenApp("projects")
@@ -141,6 +186,8 @@ export default function DesktopShell() {
       onContextMenu={handleContextMenu}
     >
       <div className={`absolute inset-0 transition-colors duration-1000 ${wallpaperClasses[wallpaper as keyof typeof wallpaperClasses] || wallpaperClasses.default}`} />
+
+      <WidgetManager />
 
       <DesktopIcons />
 

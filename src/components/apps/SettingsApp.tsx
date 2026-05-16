@@ -10,7 +10,8 @@ import {
   User,
   Zap,
   Clock,
-  Layout
+  Layout,
+  StickyNote
 } from "lucide-react";
 
 export default function SettingsApp() {
@@ -20,7 +21,8 @@ export default function SettingsApp() {
     showSeconds, setShowSeconds,
     reduceMotion, setReduceMotion,
     transparency, setTransparency,
-    userName, setUserName
+    userName, setUserName,
+    defaultNoteContent, setDefaultNoteContent
   } = useConfigStore();
 
   const [activeTab, setActiveTab] = useState("personalization");
@@ -199,6 +201,26 @@ export default function SettingsApp() {
                     </button>
                   ))}
                 </div>
+              </section>
+
+              <section className="space-y-3">
+                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 px-1">Widget Settings</h3>
+                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <StickyNote size={16} className="text-amber-400" />
+                        <div>
+                          <p className="text-xs font-bold">Default Sticky Note Content</p>
+                          <p className="text-[10px] text-zinc-500">Text used for new sticky note widgets</p>
+                        </div>
+                      </div>
+                      <textarea
+                        value={defaultNoteContent}
+                        onChange={(e) => setDefaultNoteContent(e.target.value)}
+                        className="w-full h-24 bg-black/40 border border-white/10 rounded-lg p-3 text-[10px] outline-none focus:border-blue-500/50 transition-colors resize-none"
+                      />
+                    </div>
+                 </div>
               </section>
 
               <section className="space-y-3">
