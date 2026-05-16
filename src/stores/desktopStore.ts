@@ -36,16 +36,15 @@ export const useDesktopStore = create<DesktopState>()(
       iconPositions: {},
       widgets: [
         {
-          id: 'default-clock',
-          type: 'clock',
-          position: { x: window.innerWidth - 400, y: 40 },
-        },
-        {
-          id: 'default-note',
+          id: 'welcome-note',
           type: 'sticky-note',
-          position: { x: window.innerWidth - 400, y: 300 },
-          content: 'Welcome to my Portfolio OS! 🚀\n\n- Icons are movable\n- Right click for more options\n- Double click to open apps',
-          size: { width: 320, height: 280 }
+          // Positioned in the upper right corner
+          position: {
+            x: typeof window !== 'undefined' ? window.innerWidth - 360 : 800,
+            y: 40
+          },
+          content: 'Welcome to IdentityOS! 🚀\n\nThis is a fully functional desktop environment built with React.\n\n- Double-click icons to open apps\n- Drag icons/widgets to move them\n- Resize widgets using the bottom-right handle\n- Right-click desktop to add more widgets',
+          size: { width: 320, height: 320 }
         }
       ],
       setIconPosition: (appId, position) =>
@@ -83,7 +82,7 @@ export const useDesktopStore = create<DesktopState>()(
         })),
     }),
     {
-      name: 'portfolio-desktop-v2',
+      name: 'portfolio-desktop-v12',
     }
   )
 );

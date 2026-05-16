@@ -1,7 +1,7 @@
 import { useDesktopStore } from "../../stores/desktopStore";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { Clock as ClockIcon, StickyNote as StickyNoteIcon, Calendar as CalendarIcon, X, CloudSun, Zap, Cpu, GripVertical, Cloud, CloudRain, Sun, Snowflake, MapPin, Loader2, Thermometer, MoveDiagonal2 } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -35,7 +35,6 @@ function WidgetRenderer({ widget, onPositionChange, onSizeChange, onContentChang
   const [isResizing, setIsResizing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  // High-performance MotionValues to prevent React re-render freezes during resize
   const width = useMotionValue(widget.size?.width || 320);
   const height = useMotionValue(widget.size?.height || 320);
 
@@ -79,8 +78,7 @@ function WidgetRenderer({ widget, onPositionChange, onSizeChange, onContentChang
       style={{ width, height }}
     >
       <div className="relative flex-1 flex flex-col h-full w-full">
-        {/* Close Button */}
-        <div className="absolute -top-3 -right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+        <div className="absolute -top-3 -right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-[110]">
           <button
             onClick={onRemove}
             className="p-1.5 bg-red-500/80 hover:bg-red-500 rounded-full text-white shadow-xl transition-all transform hover:scale-110 border border-white/20"
@@ -89,14 +87,12 @@ function WidgetRenderer({ widget, onPositionChange, onSizeChange, onContentChang
           </button>
         </div>
 
-        {/* Drag Handle */}
-        <div className="drag-handle absolute -left-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 backdrop-blur-md rounded-full text-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-grab active:cursor-grabbing hover:text-white/80 border border-white/10 shadow-xl z-50">
+        <div className="drag-handle absolute -left-4 top-1/2 -translate-y-1/2 p-2 bg-white/10 backdrop-blur-md rounded-full text-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-grab active:cursor-grabbing hover:text-white/80 border border-white/10 shadow-xl z-[110]">
           <GripVertical size={14} />
         </div>
 
-        {/* Resize Handle (Pan-based for high performance) */}
         <motion.div
-          className="absolute -bottom-2 -right-2 p-1.5 bg-white/10 backdrop-blur-md rounded-full text-white/40 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-nwse-resize hover:text-white/80 border border-white/10 shadow-xl z-50"
+          className="absolute -bottom-2 -right-2 p-1.5 bg-white/10 backdrop-blur-md rounded-full text-white/40 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-nwse-resize hover:text-white/80 border border-white/10 shadow-xl z-[110]"
           onPanStart={() => setIsResizing(true)}
           onPan={(_, info) => {
             width.set(Math.max(200, width.get() + info.delta.x));
@@ -110,7 +106,7 @@ function WidgetRenderer({ widget, onPositionChange, onSizeChange, onContentChang
           <MoveDiagonal2 size={14} />
         </motion.div>
 
-        <div className="flex-1 h-full w-full overflow-hidden rounded-[2.5rem]">
+        <div className="flex-1 h-full w-full overflow-hidden rounded-[2.5rem]" style={{ containerType: 'size' }}>
           {widget.type === 'clock' && <ClockWidget />}
           {widget.type === 'sticky-note' && (
             <StickyNoteWidget content={widget.content} onContentChange={onContentChange} />
@@ -140,7 +136,7 @@ function ClockWidget() {
   }, [hours]);
 
   return (
-    <div className="bg-zinc-950/40 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] p-8 h-full w-full shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center text-center relative overflow-hidden ring-1 ring-white/10 group/clock" style={{ containerType: 'size' }}>
+    <div className="bg-zinc-950/40 backdrop-blur-[40px] border border-white/10 rounded-[2.5rem] p-8 h-full w-full shadow-2xl flex flex-col items-center justify-center text-center relative overflow-hidden ring-1 ring-white/10 group/clock">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-70" />
 
       <p className="text-[min(14px,4cqw)] font-black uppercase tracking-[0.5em] bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2 relative z-10">
@@ -171,16 +167,29 @@ function ClockWidget() {
 }
 
 function StickyNoteWidget({ content, onContentChange }: any) {
+  const [localContent, setLocalSize] = useState(content);
+  const timeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    setLocalSize(content);
+  }, [content]);
+
+  const handleChange = (val: string) => {
+    setLocalSize(val);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => onContentChange(val), 500);
+  };
+
   return (
-    <div className="bg-amber-300/15 backdrop-blur-3xl border border-amber-400/30 rounded-[2.5rem] p-8 h-full w-full shadow-[0_30px_60px_rgba(0,0,0,0.4)] relative group/note ring-1 ring-amber-400/20 overflow-hidden flex flex-col">
+    <div className="bg-amber-300/15 backdrop-blur-3xl border border-amber-400/30 rounded-[2.5rem] p-8 h-full w-full shadow-2xl relative group/note ring-1 ring-amber-400/20 overflow-hidden flex flex-col">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400/50 to-orange-500/50" />
       <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-28 h-10 bg-white/10 backdrop-blur-2xl border border-white/10 rounded-xl shadow-xl z-10 flex items-center justify-center drag-handle">
         <div className="w-12 h-1 bg-white/20 rounded-full" />
       </div>
 
       <textarea
-        value={content}
-        onChange={(e) => onContentChange(e.target.value)}
+        value={localContent}
+        onChange={(e) => handleChange(e.target.value)}
         className="flex-1 w-full bg-transparent border-none focus:ring-0 text-amber-50 font-medium resize-none placeholder-amber-200/20 text-lg leading-relaxed mt-6 custom-scrollbar-thin scroll-smooth"
         placeholder="Drop a thought..."
       />
@@ -289,7 +298,7 @@ function WeatherWidget() {
         <div className="relative z-10 flex flex-col justify-center">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p className="text-6xl font-light tracking-tighter drop-shadow-2xl">
+              <p className="text-[min(4rem,18cqw)] font-light tracking-tighter drop-shadow-2xl">
                 {Math.round(weather?.temperature || 0)}°
               </p>
               <p className="text-[13px] font-black opacity-90 mt-1 uppercase tracking-widest text-blue-200">Live Local</p>
