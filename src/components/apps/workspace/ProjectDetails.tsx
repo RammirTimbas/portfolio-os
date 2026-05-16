@@ -108,7 +108,7 @@ export default function ProjectDetails({ project, onLaunch }: Props) {
              </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_4fr] gap-10 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             {/* Column 1: Documentation */}
             <section className="space-y-4">
               <div className="flex items-center gap-2 text-white">
@@ -158,8 +158,8 @@ export default function ProjectDetails({ project, onLaunch }: Props) {
               </div>
             </aside>
 
-            {/* Column 3: THE BIGGEST SPACE - Project Gallery */}
-            <section className="space-y-4">
+            {/* Row 2: Full Width Gallery */}
+            <section className="space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2 text-white">
                 <ImageIcon size={16} className="text-blue-400" />
                 <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Project Gallery</h3>
