@@ -43,7 +43,7 @@ export const useDesktopStore = create<DesktopState>()(
             x: typeof window !== 'undefined' ? window.innerWidth - 360 : 800,
             y: 40
           },
-          content: 'Welcome to IdentityOS! 🚀\n\nThis is a fully functional desktop environment built with React.\n\n- Double-click icons to open apps\n- Drag icons/widgets to move them\n- Resize widgets using the bottom-right handle\n- Right-click desktop to add more widgets',
+          content: 'Welcome to Portfolio OS! \n\nFeel free to explore this OS-themed portfolio showcasing my projects and skills.',
           size: { width: 320, height: 320 }
         }
       ],

@@ -8,9 +8,10 @@ interface ProjectState {
   isLoading: boolean;
   error: string | null;
   fetchProjects: () => Promise<void>;
+  fetchProjectImages: (projectId: string) => Promise<void>;
 }
 
-export const useProjectStore = create<ProjectState>((set) => ({
+export const useProjectStore = create<ProjectState>((set, get) => ({
   projects: staticProjects,
   isLoading: false,
   error: null,
@@ -65,8 +66,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
             category: (existingProject?.category || inferredCategory),
             github: repo.html_url,
             demo: existingProject?.demo || repo.homepage || null,
-            image: existingProject?.image,
-            images: existingProject?.images,
+            // Fallback to GitHub Social Preview if no image is defined
+            image: existingProject?.image || `https://opengraph.githubassets.com/1/${username}/${repo.name}`,
+            images: existingProject?.images || [],
             stars: repo.stargazers_count,
             forks: repo.forks_count,
             language: repo.language,
@@ -86,4 +88,37 @@ export const useProjectStore = create<ProjectState>((set) => ({
       set({ error: err.message, isLoading: false });
     }
   },
+
+  fetchProjectImages: async (projectId: string) => {
+    const project = get().projects.find(p => p.id === projectId);
+    // Skip if it's not a GitHub repo or if we already have a gallery (unless it's just the social preview)
+    if (!project || !project.github || (project.images && project.images.length > 0 && !project.images[0].includes('opengraph'))) return;
+
+    try {
+      const repoPath = project.github.replace('https://github.com/', '');
+
+      // Try fetching from a 'screenshots' directory first
+      const response = await fetch(`https://api.github.com/repos/${repoPath}/contents/screenshots`);
+
+      if (response.ok) {
+        const contents = await response.json();
+        const imageUrls = contents
+          .filter((file: any) =>
+            file.type === 'file' &&
+            /\.(jpe?g|png|gif|webp)$/i.test(file.name)
+          )
+          .map((file: any) => file.download_url);
+
+        if (imageUrls.length > 0) {
+          set(state => ({
+            projects: state.projects.map(p =>
+              p.id === projectId ? { ...p, images: imageUrls } : p
+            )
+          }));
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to fetch screenshots for ${projectId}`, e);
+    }
+  }
 }));

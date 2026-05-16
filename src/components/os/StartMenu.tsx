@@ -139,7 +139,7 @@ export default function StartMenu() {
                   <span className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors uppercase tracking-tight">
                     {userName}
                   </span>
-                  <span className="text-[9px] text-zinc-500 font-mono">System Admin</span>
+                  <span className="text-[9px] text-zinc-500 font-mono">Developer</span>
                 </div>
               </div>
               <div className="flex gap-1">

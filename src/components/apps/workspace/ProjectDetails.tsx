@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Project } from "../../../types/project";
 import { Play, Terminal, Image as ImageIcon, Package, Info, CheckCircle2, Code2, GitBranch, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import ProjectSlideshow from "./ProjectSlideshow";
+import { useProjectStore } from "../../../stores/projectStore";
 
 interface Props {
   project: Project | null;
@@ -11,6 +12,13 @@ interface Props {
 
 export default function ProjectDetails({ project, onLaunch }: Props) {
   const [isLaunching, setIsLaunching] = useState(false);
+  const fetchProjectImages = useProjectStore(state => state.fetchProjectImages);
+
+  useEffect(() => {
+    if (project?.id) {
+      fetchProjectImages(project.id);
+    }
+  }, [project?.id, fetchProjectImages]);
 
   const handleRunAnimation = () => {
     setIsLaunching(true);
@@ -35,7 +43,7 @@ export default function ProjectDetails({ project, onLaunch }: Props) {
   const allImages = [
     ...(project.image ? [project.image] : []),
     ...(project.images || [])
-  ];
+  ].filter((img, index, self) => self.indexOf(img) === index); // Remove duplicates
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-zinc-900/10">
