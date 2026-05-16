@@ -10,7 +10,12 @@ export const projects: Project[] = [
     status: "wip",
     category: "web",
     github: "https://github.com/rammirtimbas/portfolio-os",
-    image: "/projects/os.png",
+    image: "/portfolio_ss/home.png", // Changed from /projects/os.png which was missing
+    images: [
+      "/portfolio_ss/home.png",
+      "/portfolio_ss/identity.png",
+      "/portfolio_ss/settings.png"
+    ],
     metadata: { version: "2.4.0-stable", size: "14.2 MB", lastModified: "2024-05-20" }
   },
 ];

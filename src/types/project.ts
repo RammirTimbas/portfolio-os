@@ -11,6 +11,7 @@ export interface Project {
   github?: string;
   demo?: string;
   image?: string;
+  images?: string[];
   category: ProjectCategory;
   stars?: number;
   forks?: number;
