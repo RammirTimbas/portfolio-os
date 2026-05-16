@@ -123,7 +123,7 @@ export default function WindowFrame({
 
   // Modern Inset Maximization Constants
   const MARGIN = 12;
-  const TASKBAR_RESERVE = 100; // Height reserved for the floating taskbar gap
+  const TASKBAR_RESERVE = 100;
 
   return (
     <motion.div
@@ -220,7 +220,7 @@ export default function WindowFrame({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto relative z-0 no-scrollbar">
+      <div className="flex-1 overflow-auto relative z-0">
         {children}
       </div>
     </motion.div>

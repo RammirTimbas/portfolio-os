@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { profileData } from "../../data/profile";
 import { apps } from "../../data/apps";
 import { projects } from "../../data/projects";
 import { useWindowStore } from "../../stores/windowStore";
 
 export default function TerminalApp() {
-  const [history, setHistory] = useState<(string | JSX.Element)[]>([
+  const [history, setHistory] = useState<(string | ReactNode)[]>([
     "Identity CLI [Version 1.0.42]",
     "System: IdentityOS Kernel 5.10.0-react",
     "Copyright (c) 2024 Rammir Timbas. All rights reserved.",
@@ -62,7 +62,7 @@ export default function TerminalApp() {
     const [cmd, ...args] = fullCmd.toLowerCase().split(" ");
     const argStr = args.join(" ");
 
-    let response: string | JSX.Element | (string | JSX.Element)[] = "";
+    let response: string | ReactNode | (string | ReactNode)[] = "";
 
     switch (cmd) {
       case "help":
