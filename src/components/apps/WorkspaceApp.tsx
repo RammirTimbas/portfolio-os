@@ -37,11 +37,21 @@ export default function WorkspaceApp() {
 
   const handleLaunchProject = useCallback((project: Project) => {
     if (project.demo) {
-      window.open(project.demo, "_blank");
+      openWindow({
+        id: crypto.randomUUID(),
+        appId: "browser",
+        title: `Browser - ${project.title}`,
+        position: {
+          x: window.innerWidth / 2 - 512 + (Math.random() * 20),
+          y: window.innerHeight / 2 - 384 + (Math.random() * 20),
+        },
+        size: { width: 1024, height: 768 },
+        params: { url: project.demo, title: project.title }
+      });
     } else if (project.github) {
       window.open(project.github, "_blank");
     }
-  }, []);
+  }, [openWindow]);
 
   return (
     <div className="flex h-full w-full bg-zinc-950 text-white overflow-hidden select-none">

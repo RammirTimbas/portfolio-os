@@ -20,9 +20,15 @@ export default function ProjectDetails({ project, onLaunch }: Props) {
     }
   }, [project?.id, fetchProjectImages]);
 
-  const handleRunAnimation = () => {
-    setIsLaunching(true);
-    setTimeout(() => setIsLaunching(false), 2000);
+  const handleRunAnimation = (e: React.MouseEvent) => {
+    if (project?.demo) {
+      e.preventDefault();
+      setIsLaunching(true);
+      setTimeout(() => {
+        setIsLaunching(false);
+        onLaunch(project);
+      }, 2000);
+    }
   };
 
   if (!project) {
@@ -86,16 +92,13 @@ export default function ProjectDetails({ project, onLaunch }: Props) {
 
              <div className="flex items-center gap-3">
                {project.demo ? (
-                 <a
-                   href={project.demo}
-                   target="_blank"
-                   rel="noopener noreferrer"
+                 <button
                    onClick={handleRunAnimation}
                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-xs font-bold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/40 active:scale-95"
                  >
                    <ExternalLink size={14} />
                    View Live Demo
-                 </a>
+                 </button>
                ) : (
                  <button className="flex items-center gap-2 rounded-xl bg-zinc-800 px-8 py-3 text-xs font-bold text-zinc-500 cursor-not-allowed border border-white/5 opacity-50" disabled>
                    <Play size={14} className="opacity-20" />

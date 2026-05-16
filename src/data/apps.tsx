@@ -1,4 +1,4 @@
-import { Terminal, Layout, Settings, FolderKanban, Info, ShieldCheck, Music } from "lucide-react";
+import { Terminal, Layout, Settings, FolderKanban, Info, ShieldCheck, Music, Globe } from "lucide-react";
 import AboutApp from "../components/apps/AboutApp";
 import WorkspaceApp from "../components/apps/WorkspaceApp";
 import ProjectViewer from "../components/apps/workspace/ProjectViewer";
@@ -6,6 +6,7 @@ import ProjectProperties from "../components/apps/workspace/ProjectProperties";
 import SettingsApp from "../components/apps/SettingsApp";
 import TerminalApp from "../components/apps/TerminalApp";
 import MusicApp from "../components/apps/MusicApp";
+import BrowserApp from "../components/apps/BrowserApp";
 import type { AppDefinition } from "../types/app";
 
 export const apps: AppDefinition[] = [
@@ -23,6 +24,14 @@ export const apps: AppDefinition[] = [
     component: WorkspaceApp,
     defaultSize: { width: 1000, height: 700 },
     defaultMaximized: true,
+  },
+  {
+    id: "browser",
+    title: "Browser",
+    icon: Globe,
+    component: BrowserApp,
+    defaultSize: { width: 1024, height: 768 },
+    hideFromDesktop: true,
   },
   {
     id: "project-viewer",

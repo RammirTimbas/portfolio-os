@@ -1,6 +1,7 @@
 import type { Project } from "../../../types/project";
 import { ExternalLink, Code2, Globe, Shield, Info, Package, Image as ImageIcon, GitBranch } from "lucide-react";
 import ProjectSlideshow from "./ProjectSlideshow";
+import { useWindowStore } from "../../../stores/windowStore";
 
 interface Props {
   params?: { project: Project };
@@ -8,6 +9,7 @@ interface Props {
 
 export default function ProjectViewer({ params }: Props) {
   const project = params?.project;
+  const openWindow = useWindowStore((state) => state.openWindow);
 
   if (!project) return null;
 
@@ -15,6 +17,23 @@ export default function ProjectViewer({ params }: Props) {
     ...(project.image ? [project.image] : []),
     ...(project.images || [])
   ];
+
+  const handleLaunchDemo = (e: React.MouseEvent) => {
+    if (project.demo) {
+      e.preventDefault();
+      openWindow({
+        id: crypto.randomUUID(),
+        appId: "browser",
+        title: `Browser - ${project.title}`,
+        position: {
+          x: window.innerWidth / 2 - 512 + (Math.random() * 20),
+          y: window.innerHeight / 2 - 384 + (Math.random() * 20),
+        },
+        size: { width: 1024, height: 768 },
+        params: { url: project.demo, title: project.title }
+      });
+    }
+  };
 
   return (
     <div className="flex h-full w-full flex-col bg-zinc-950 text-white selection:bg-blue-500/30">
@@ -61,14 +80,12 @@ export default function ProjectViewer({ params }: Props) {
 
               <div className="flex flex-col gap-3">
                 {project.demo && (
-                  <a
-                    href={project.demo}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={handleLaunchDemo}
                     className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95"
                   >
                     Launch Demo <ExternalLink size={16} />
-                  </a>
+                  </button>
                 )}
                 {project.github && (
                   <a
