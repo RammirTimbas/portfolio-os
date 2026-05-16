@@ -4,7 +4,11 @@ import { apps } from "../../data/apps";
 import { useProjectStore } from "../../stores/projectStore";
 import { useWindowStore } from "../../stores/windowStore";
 
-export default function TerminalApp() {
+interface Props {
+  isMobile?: boolean;
+}
+
+export default function TerminalApp({ isMobile }: Props) {
   const { projects } = useProjectStore();
   const [history, setHistory] = useState<(string | ReactNode)[]>([
     "Identity CLI [Version 1.0.42]",
@@ -341,7 +345,7 @@ export default function TerminalApp() {
 
   return (
     <div
-      className={`flex h-full flex-col bg-black p-4 font-mono text-sm leading-relaxed ${terminalColor} overflow-hidden`}
+      className={`flex h-full flex-col bg-black p-4 font-mono text-[11px] md:text-sm leading-relaxed ${terminalColor} overflow-hidden`}
       onClick={() => inputRef.current?.focus()}
     >
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-0.5 custom-scrollbar selection:bg-white/20 selection:text-white">
@@ -350,7 +354,7 @@ export default function TerminalApp() {
             {line}
           </div>
         ))}
-        <form onSubmit={handleCommand} className="flex gap-2 pt-1">
+        <form onSubmit={handleCommand} className="flex gap-1 md:gap-2 pt-1">
           <span className={`${terminalColor.replace('/90', '')} font-bold shrink-0`}>visitor@identity:~$</span>
           <input
             ref={inputRef}
@@ -361,6 +365,7 @@ export default function TerminalApp() {
             onKeyDown={handleKeyDown}
             spellCheck={false}
             autoComplete="off"
+            inputMode="text"
           />
         </form>
       </div>

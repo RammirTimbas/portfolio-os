@@ -15,7 +15,11 @@ import {
   Cpu
 } from "lucide-react";
 
-export default function AboutApp() {
+interface Props {
+  isMobile?: boolean;
+}
+
+export default function AboutApp({ isMobile }: Props) {
   const [bootStep, setBootStep] = useState(0);
   const [view, setView] = useState<"gui" | "cli" | "preview">("gui");
   const [copied, setCopied] = useState(false);
@@ -70,43 +74,45 @@ export default function AboutApp() {
 
   return (
     <div className="flex h-full w-full flex-col bg-zinc-950 overflow-hidden selection:bg-blue-500/30">
-      {/* OS App Bar */}
-      <div className="flex items-center justify-between border-b border-white/5 bg-zinc-900/80 backdrop-blur-md px-4 py-2">
-        <div className="flex items-center gap-3">
-          {view === "preview" ? (
+      {/* OS App Bar - Hidden on mobile as MobileShell provides it */}
+      {!isMobile && (
+        <div className="flex items-center justify-between border-b border-white/5 bg-zinc-900/80 backdrop-blur-md px-4 py-2">
+          <div className="flex items-center gap-3">
+            {view === "preview" ? (
+              <button
+                onClick={() => setView("gui")}
+                className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 hover:text-white transition-colors"
+              >
+                <ChevronLeft size={14} /> Back to Dashboard
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="text-blue-500" size={14} />
+                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Identity Dashboard</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center rounded-lg bg-black/40 p-0.5 border border-white/5">
             <button
               onClick={() => setView("gui")}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 hover:text-white transition-colors"
+              className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[9px] font-bold transition-all ${
+                view === "gui" ? "bg-blue-600 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
+              }`}
             >
-              <ChevronLeft size={14} /> Back to Dashboard
+              <Layout size={12} /> GUI
             </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-blue-500" size={14} />
-              <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Identity Dashboard</span>
-            </div>
-          )}
+            <button
+              onClick={() => setView("cli")}
+              className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[9px] font-bold transition-all ${
+                view === "cli" ? "bg-zinc-700 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              <Terminal size={12} /> CLI
+            </button>
+          </div>
         </div>
-
-        <div className="flex items-center rounded-lg bg-black/40 p-0.5 border border-white/5">
-          <button
-            onClick={() => setView("gui")}
-            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[9px] font-bold transition-all ${
-              view === "gui" ? "bg-blue-600 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <Layout size={12} /> GUI
-          </button>
-          <button
-            onClick={() => setView("cli")}
-            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[9px] font-bold transition-all ${
-              view === "cli" ? "bg-zinc-700 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <Terminal size={12} /> CLI
-          </button>
-        </div>
-      </div>
+      )}
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {view === "cli" ? (
@@ -131,7 +137,7 @@ export default function AboutApp() {
             </div>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
             <ProfileHeader />
             <SystemInfoPanel />
             <div className="px-6 pb-2">
@@ -148,24 +154,48 @@ export default function AboutApp() {
         )}
       </div>
 
-      {/* Footer Metadata Bar */}
-      <div className="border-t border-white/5 bg-zinc-900/80 backdrop-blur-md p-2 px-4 flex justify-between items-center">
-        <button
-          onClick={copyIdentityJson}
-          className="flex items-center gap-2 group"
-        >
-          <FileJson size={12} className="text-zinc-500 group-hover:text-blue-400 transition-colors" />
-          <span className="text-[9px] font-mono text-zinc-500 group-hover:text-zinc-300 transition-colors">
-            {copied ? "IDENTITY_DATA_COPIED" : "EXPORT IDENTITY.JSON"}
-          </span>
-          {copied && <Check size={10} className="text-emerald-400" />}
-        </button>
+      {/* Footer Metadata Bar - Hidden on mobile */}
+      {!isMobile && (
+        <div className="border-t border-white/5 bg-zinc-900/80 backdrop-blur-md p-2 px-4 flex justify-between items-center">
+          <button
+            onClick={copyIdentityJson}
+            className="flex items-center gap-2 group"
+          >
+            <FileJson size={12} className="text-zinc-500 group-hover:text-blue-400 transition-colors" />
+            <span className="text-[9px] font-mono text-zinc-500 group-hover:text-zinc-300 transition-colors">
+              {copied ? "IDENTITY_DATA_COPIED" : "EXPORT IDENTITY.JSON"}
+            </span>
+            {copied && <Check size={10} className="text-emerald-400" />}
+          </button>
 
-        <div className="flex gap-4">
-          <span className="text-[9px] font-mono text-zinc-600">SECURE_TUNNEL: ENABLED</span>
-          <span className="text-[9px] font-mono text-zinc-600">v4.0.0-PRO</span>
+          <div className="flex gap-4">
+            <span className="text-[9px] font-mono text-zinc-600">SECURE_TUNNEL: ENABLED</span>
+            <span className="text-[9px] font-mono text-zinc-600">v4.0.0-PRO</span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Mobile view switchers at bottom of AboutApp for easier access */}
+      {isMobile && view !== "preview" && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center rounded-full bg-black/60 backdrop-blur-xl p-1 border border-white/10 shadow-2xl z-[60]">
+          <button
+            onClick={() => setView("gui")}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-bold transition-all ${
+              view === "gui" ? "bg-blue-600 text-white" : "text-zinc-500"
+            }`}
+          >
+            <Layout size={14} /> DASHBOARD
+          </button>
+          <button
+            onClick={() => setView("cli")}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-bold transition-all ${
+              view === "cli" ? "bg-zinc-700 text-white" : "text-zinc-500"
+            }`}
+          >
+            <Terminal size={14} /> CONSOLE
+          </button>
+        </div>
+      )}
     </div>
   );
 }

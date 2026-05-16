@@ -5,9 +5,10 @@ import { useWindowStore } from "../../../stores/windowStore";
 
 interface Props {
   params?: { project: Project };
+  isMobile?: boolean;
 }
 
-export default function ProjectViewer({ params }: Props) {
+export default function ProjectViewer({ params, isMobile }: Props) {
   const project = params?.project;
   const openWindow = useWindowStore((state) => state.openWindow);
 
@@ -37,43 +38,45 @@ export default function ProjectViewer({ params }: Props) {
 
   return (
     <div className="flex h-full w-full flex-col bg-zinc-950 text-white selection:bg-blue-500/30">
-      {/* Header Status Bar */}
-      <div className="flex items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 py-3 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-400">
-            <Globe size={16} />
+      {/* Header Status Bar - Hidden on mobile as MobileShell provides a header */}
+      {!isMobile && (
+        <div className="flex items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 py-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-400">
+              <Globe size={16} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold tracking-tight">{project.title}</h2>
+              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter">System Artifact: {project.id}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-sm font-bold tracking-tight">{project.title}</h2>
-            <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-tighter">System Artifact: {project.id}</p>
+
+          <div className="flex items-center gap-2">
+             <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border ${
+               project.status === 'completed'
+                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                 : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+             }`}>
+               <div className={`h-1 w-1 rounded-full ${project.status === 'completed' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+               {project.status.toUpperCase()}
+             </span>
           </div>
         </div>
+      )}
 
-        <div className="flex items-center gap-2">
-           <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border ${
-             project.status === 'completed'
-               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-               : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-           }`}>
-             <div className={`h-1 w-1 rounded-full ${project.status === 'completed' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
-             {project.status.toUpperCase()}
-           </span>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-        <div className="max-w-6xl mx-auto space-y-10">
+      <div className={`flex-1 overflow-y-auto ${isMobile ? 'p-4' : 'p-8'} custom-scrollbar`}>
+        <div className="max-w-6xl mx-auto space-y-6 md:space-y-10">
           {/* Main Content Grid: 1fr | 1fr | 2fr */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_2fr] gap-10 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_2fr] gap-6 md:gap-10 items-start">
 
             {/* Column 1: Overview & Actions */}
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               <section className="space-y-4">
                 <div className="flex items-center gap-2 text-white">
                   <Info size={16} className="text-blue-400" />
                   <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Documentation</h3>
                 </div>
-                <div className="text-zinc-300 leading-relaxed text-sm font-medium bg-white/5 p-6 rounded-2xl border border-white/5 min-h-[150px]">
+                <div className="text-zinc-300 leading-relaxed text-sm font-medium bg-white/5 p-4 md:p-6 rounded-2xl border border-white/5 min-h-[120px] md:min-h-[150px]">
                   {project.longDescription || project.description}
                 </div>
               </section>
@@ -101,7 +104,7 @@ export default function ProjectViewer({ params }: Props) {
             </div>
 
             {/* Column 2: Technical Specs */}
-            <aside className="space-y-8">
+            <aside className="space-y-6 md:space-y-8">
               <section className="space-y-4">
                 <div className="flex items-center gap-2 text-white">
                   <Package size={16} className="text-blue-400" />
@@ -117,7 +120,7 @@ export default function ProjectViewer({ params }: Props) {
                 </div>
               </section>
 
-              <section className="rounded-2xl bg-zinc-900/50 border border-white/5 p-6 shadow-inner space-y-4">
+              <section className="rounded-2xl bg-zinc-900/50 border border-white/5 p-4 md:p-6 shadow-inner space-y-4">
                 <div className="flex items-center gap-2 text-zinc-400">
                   <Shield size={14} />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Environment</span>
@@ -131,19 +134,18 @@ export default function ProjectViewer({ params }: Props) {
                     <span className="text-zinc-500">Package Size</span>
                     <span className="text-blue-400">{project.metadata?.size || "N/A"}</span>
                   </div>
-                  <div className="flex justify-between text-[11px] font-mono">
-                    <span className="text-zinc-500">Sync Status</span>
-                    <span className="text-emerald-500 flex items-center gap-1.5">
-                      <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                      Live
-                    </span>
-                  </div>
+                  {isMobile && (
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-zinc-500">Status</span>
+                      <span className="text-emerald-500">{project.status.toUpperCase()}</span>
+                    </div>
+                  )}
                 </div>
               </section>
             </aside>
 
             {/* Column 3: Project Gallery (Largest) */}
-            <section className="space-y-4">
+            <section className="space-y-4 lg:order-last order-first">
               <div className="flex items-center gap-2 text-white">
                 <ImageIcon size={16} className="text-blue-400" />
                 <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Project Gallery</h3>
