@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { profileData } from "../../data/profile";
 import { apps } from "../../data/apps";
-import { projects } from "../../data/projects";
+import { useProjectStore } from "../../stores/projectStore";
 import { useWindowStore } from "../../stores/windowStore";
 
 export default function TerminalApp() {
+  const { projects } = useProjectStore();
   const [history, setHistory] = useState<(string | ReactNode)[]>([
     "Identity CLI [Version 1.0.42]",
     "System: IdentityOS Kernel 5.10.0-react",

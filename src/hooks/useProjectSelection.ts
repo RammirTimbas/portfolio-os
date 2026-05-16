@@ -1,11 +1,26 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { ProjectCategory } from '../types/project';
-import { projects } from '../data/projects';
+import { useProjectStore } from '../stores/projectStore';
 
 export const useProjectSelection = () => {
+  const { projects, fetchProjects, isLoading } = useProjectStore();
   const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'all' | 'recent'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(projects[0]?.id || null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Initial fetch if empty
+    if (projects.length <= 4) { // Only fetch if we only have the static placeholders
+       fetchProjects();
+    }
+  }, []);
+
+  // Sync selected project once projects are loaded
+  useEffect(() => {
+    if (!selectedProjectId && projects.length > 0) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [projects, selectedProjectId]);
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
@@ -20,11 +35,11 @@ export const useProjectSelection = () => {
 
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [projects, activeCategory, searchQuery]);
 
   const selectedProject = useMemo(() => {
     return projects.find(p => p.id === selectedProjectId) || null;
-  }, [selectedProjectId]);
+  }, [projects, selectedProjectId]);
 
   const selectProject = useCallback((id: string) => {
     setSelectedProjectId(id);
@@ -42,5 +57,6 @@ export const useProjectSelection = () => {
     filteredProjects,
     selectedProject,
     selectProject,
+    isLoading
   };
 };

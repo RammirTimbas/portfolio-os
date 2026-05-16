@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { projects } from "../../../data/projects";
+import { useProjectStore } from "../../../stores/projectStore";
 import type { Project } from "../../../types/project";
 
 interface Props {
@@ -7,6 +7,7 @@ interface Props {
 }
 
 export default function WorkspaceTerminal({ onRun }: Props) {
+  const { projects } = useProjectStore();
   const [history, setHistory] = useState<string[]>([
     "Microsoft Windows [Version 10.0.22631.3593]",
     "(c) Microsoft Corporation. All rights reserved.",

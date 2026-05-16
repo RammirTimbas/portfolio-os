@@ -12,6 +12,9 @@ export interface Project {
   demo?: string;
   image?: string;
   category: ProjectCategory;
+  stars?: number;
+  forks?: number;
+  language?: string;
   metadata?: {
     version: string;
     size: string;
