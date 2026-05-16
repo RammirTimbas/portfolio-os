@@ -4,6 +4,7 @@ import Taskbar from "../../components/taskbar/Taskbar";
 import ContextMenu from "../../components/os/ContextMenu";
 import StartMenu from "../../components/os/StartMenu";
 import WidgetManager from "../../components/os/WidgetManager";
+import FullscreenPrompt from "../../components/os/FullscreenPrompt";
 import { useContextMenuStore } from "../../stores/contextMenuStore";
 import { useWindowStore } from "../../stores/windowStore";
 import { useDesktopStore } from "../../stores/desktopStore";
@@ -201,6 +202,8 @@ export default function DesktopShell() {
       <Taskbar />
 
       <ContextMenu />
+
+      <FullscreenPrompt />
     </main>
   );
 }
