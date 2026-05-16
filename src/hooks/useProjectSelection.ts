@@ -10,14 +10,15 @@ export const useProjectSelection = () => {
 
   useEffect(() => {
     // Initial fetch if empty
-    if (projects.length <= 4) { // Only fetch if we only have the static placeholders
+    if (projects.length <= 4) {
        fetchProjects();
     }
   }, []);
 
-  // Sync selected project once projects are loaded
+  // Auto-selection: Only on larger screens and if no project is currently selected
   useEffect(() => {
-    if (!selectedProjectId && projects.length > 0) {
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop && !selectedProjectId && projects.length > 0) {
       setSelectedProjectId(projects[0].id);
     }
   }, [projects, selectedProjectId]);
@@ -41,12 +42,16 @@ export const useProjectSelection = () => {
     return projects.find(p => p.id === selectedProjectId) || null;
   }, [projects, selectedProjectId]);
 
-  const selectProject = useCallback((id: string) => {
+  const selectProject = useCallback((id: string | null) => {
     setSelectedProjectId(id);
   }, []);
 
   const changeCategory = useCallback((category: ProjectCategory | 'all' | 'recent') => {
     setActiveCategory(category);
+    // Clear selection when changing category on mobile to avoid layout confusion
+    if (window.innerWidth < 768) {
+      setSelectedProjectId(null);
+    }
   }, []);
 
   return {

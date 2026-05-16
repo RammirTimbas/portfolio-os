@@ -1,5 +1,5 @@
 import type { Project } from "../../../types/project";
-import { Folder, ExternalLink, Globe, Cpu, Palette, Layers, Play, Copy, Info } from "lucide-react";
+import { Folder, ExternalLink, Globe, Cpu, Palette, Layers, Play, Copy, Info, ChevronRight } from "lucide-react";
 import { useContextMenuStore } from "../../../stores/contextMenuStore";
 import { useWindowStore } from "../../../stores/windowStore";
 
@@ -14,6 +14,9 @@ interface Props {
 export default function ProjectCard({ project, isSelected, viewMode, onClick, onLaunch }: Props) {
   const openContextMenu = useContextMenuStore((state) => state.openContextMenu);
   const openWindow = useWindowStore((state) => state.openWindow);
+
+  // Use window width to adjust card style specifically for mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const categoryIcons: Record<string, any> = {
     web: Globe,
@@ -42,6 +45,7 @@ export default function ProjectCard({ project, isSelected, viewMode, onClick, on
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    if (isMobile) return; // Disable context menu on mobile to prevent conflict with long press
     e.preventDefault();
     e.stopPropagation();
     onClick();
@@ -72,6 +76,39 @@ export default function ProjectCard({ project, isSelected, viewMode, onClick, on
       ? "bg-blue-600/20 text-blue-400 ring-1 ring-blue-500/30"
       : "hover:bg-white/5 text-zinc-400 hover:text-zinc-200"}
   `;
+
+  // On mobile, we use a specialized card that combines the best of grid and list
+  if (isMobile) {
+    return (
+      <button
+        onClick={onClick}
+        className={`
+          flex w-full items-center gap-4 p-4 rounded-2xl border transition-all active:scale-[0.98]
+          ${isSelected
+            ? "bg-blue-600/10 border-blue-500/30 text-white"
+            : "bg-white/[0.03] border-white/5 text-zinc-400 active:bg-white/10"}
+        `}
+      >
+        <div className={`
+          flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br
+          ${isSelected ? "from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20" : "from-zinc-800 to-zinc-900"}
+        `}>
+          <Icon size={24} className={isSelected ? "text-white" : "text-zinc-500"} />
+        </div>
+
+        <div className="flex-1 min-w-0 text-left">
+          <h3 className={`text-sm font-bold truncate ${isSelected ? "text-blue-400" : "text-white"}`}>
+            {project.title}
+          </h3>
+          <p className="text-[10px] text-zinc-500 truncate mt-0.5">
+            {project.stack.join(" • ")}
+          </p>
+        </div>
+
+        <ChevronRight size={18} className={`${isSelected ? "text-blue-400" : "text-zinc-700"}`} />
+      </button>
+    );
+  }
 
   if (viewMode === "list") {
     return (
