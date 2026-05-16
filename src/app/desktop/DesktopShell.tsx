@@ -95,6 +95,9 @@ export default function DesktopShell() {
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
 
+    const x = e.clientX;
+    const y = e.clientY;
+
     const menuItems = [
       {
         label: "Show Desktop",
@@ -109,31 +112,31 @@ export default function DesktopShell() {
           {
             label: "Clock",
             icon: Clock,
-            action: () => addWidget({ type: 'clock', position: { x: e.clientX, y: e.clientY } })
+            action: () => addWidget({ type: 'clock', position: { x, y } })
           },
           {
             label: "Sticky Note",
             icon: StickyNote,
             action: () => addWidget({
               type: 'sticky-note',
-              position: { x: e.clientX, y: e.clientY },
+              position: { x, y },
               content: defaultNoteContent
             })
           },
           {
             label: "Calendar",
             icon: Calendar,
-            action: () => addWidget({ type: 'calendar', position: { x: e.clientX, y: e.clientY } })
+            action: () => addWidget({ type: 'calendar', position: { x, y } })
           },
           {
             label: "Weather",
             icon: CloudSun,
-            action: () => addWidget({ type: 'weather', position: { x: e.clientX, y: e.clientY } })
+            action: () => addWidget({ type: 'weather', position: { x, y } })
           },
           {
             label: "Performance",
             icon: Cpu,
-            action: () => addWidget({ type: 'performance', position: { x: e.clientX, y: e.clientY } })
+            action: () => addWidget({ type: 'performance', position: { x, y } })
           }
         ]
       },
@@ -177,7 +180,7 @@ export default function DesktopShell() {
       }
     ];
 
-    openContextMenu(e.clientX, e.clientY, menuItems);
+    openContextMenu(x, y, menuItems);
   };
 
   return (

@@ -45,7 +45,7 @@ export default function ContextMenu() {
           {item.divider ? (
             <div className="my-1.5 h-[1px] bg-white/5 mx-2" />
           ) : (
-            <>
+            <div className="relative">
               <button
                 onClick={(e) => {
                   if (item.children) {
@@ -73,7 +73,7 @@ export default function ContextMenu() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="absolute left-[calc(100%+4px)] top-[-6px] min-w-[180px] rounded-xl border border-white/10 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-2xl"
+                    className="absolute left-[calc(100%-2px)] top-[-6px] min-w-[180px] rounded-xl border border-white/10 bg-zinc-900/90 p-1.5 shadow-2xl backdrop-blur-2xl"
                   >
                     {item.children.map((child: any, cIdx: number) => (
                       <button
@@ -92,7 +92,7 @@ export default function ContextMenu() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </>
+            </div>
           )}
         </div>
       ))}
