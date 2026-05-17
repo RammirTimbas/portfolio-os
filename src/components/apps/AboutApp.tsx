@@ -4,6 +4,7 @@ import SystemInfoPanel from "./about/SystemInfoPanel";
 import ResumePanel from "./about/ResumePanel";
 import TerminalView from "./about/TerminalView";
 import { profileData } from "../../data/profile";
+import { useResumeDownload } from "../../hooks/useResumeDownload";
 import {
   Terminal,
   Layout,
@@ -23,6 +24,7 @@ export default function AboutApp({ isMobile }: Props) {
   const [bootStep, setBootStep] = useState(0);
   const [view, setView] = useState<"gui" | "cli" | "preview">("gui");
   const [copied, setCopied] = useState(false);
+  const { downloadResume } = useResumeDownload();
 
   const bootLogs = [
     "Establishing secure link to Identity.sys...",
@@ -118,21 +120,28 @@ export default function AboutApp({ isMobile }: Props) {
         {view === "cli" ? (
           <TerminalView />
         ) : view === "preview" ? (
-          <div className="flex h-full w-full flex-col items-center justify-center p-8 bg-zinc-950">
-            <div className="w-full max-w-2xl h-full border border-white/10 rounded-xl overflow-hidden shadow-2xl flex flex-col bg-zinc-900">
+          <div className="flex h-full w-full flex-col items-center justify-center p-4 md:p-8 bg-zinc-950">
+            <div className="w-full max-w-4xl h-full border border-white/10 rounded-xl overflow-hidden shadow-2xl flex flex-col bg-zinc-900">
                <div className="p-3 border-b border-white/5 bg-zinc-800/50 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-red-500/50" />
                     <span className="text-[10px] font-mono text-zinc-400">artifact_v4_stable.pdf</span>
                   </div>
-                  <a href={profileData.resumeUrl} download className="text-[10px] bg-blue-600 px-3 py-1 rounded text-white font-bold">Download</a>
+                  <button
+                    onClick={downloadResume}
+                    className="text-[10px] bg-blue-600 px-3 py-1 rounded text-white font-bold hover:bg-blue-500 transition-colors"
+                  >
+                    Download
+                  </button>
                </div>
-               <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-white/5 p-12 text-center">
-                  <div className="relative">
-                    <Eye size={40} className="text-blue-500/50" />
-                    <div className="absolute inset-0 border-t-2 border-blue-500 animate-[scan_2s_linear_infinite]" />
-                  </div>
-                  <p className="text-xs font-mono text-zinc-500">Decrypting Visual Buffer...</p>
+               <div className="flex-1 bg-white/5 overflow-hidden relative">
+                  <iframe
+                    src={`${profileData.resumeUrl}#toolbar=0&navpanes=0`}
+                    className="w-full h-full border-none"
+                    title="Resume Preview"
+                  />
+                  {/* Subtle scanline overlay to keep the OS aesthetic */}
+                  <div className="absolute inset-0 pointer-events-none border-t border-blue-500/20 animate-[scan_4s_linear_infinite]" />
                </div>
             </div>
           </div>

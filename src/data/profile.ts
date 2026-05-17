@@ -1,3 +1,5 @@
+import resumeFile from "/Rammir_CV.pdf";
+
 export const profileData = {
   name: "Rammir Timbas",
   role: "Software Developer",
@@ -20,5 +22,5 @@ export const profileData = {
       "PostgreSQL", "Tailwind CSS", "Zustand", "Prisma"
     ],
   },
-  resumeUrl: "/Rammir_CV.pdf",
+  resumeUrl: resumeFile,
 };
