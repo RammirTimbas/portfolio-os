@@ -20,5 +20,5 @@ export const profileData = {
       "PostgreSQL", "Tailwind CSS", "Zustand", "Prisma"
     ],
   },
-  resumeUrl: "/resume.pdf",
+  resumeUrl: "/Rammir_CV.pdf",
 };

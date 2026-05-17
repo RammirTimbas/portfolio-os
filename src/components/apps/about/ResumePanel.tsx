@@ -1,7 +1,10 @@
 import { profileData } from "../../../data/profile";
 import { Download, Mail, Code, Briefcase } from "lucide-react";
+import { useResumeDownload } from "../../../hooks/useResumeDownload";
 
 export default function ResumePanel() {
+  const { downloadResume } = useResumeDownload();
+
   const handleEmailClick = () => {
     window.location.href = `mailto:${profileData.links.email}`;
   };
@@ -22,7 +25,7 @@ export default function ResumePanel() {
           <div className="flex flex-wrap gap-2">
             <button
               className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
-              onClick={() => window.open(profileData.resumeUrl, '_blank')}
+              onClick={downloadResume}
             >
               <Download size={14} />
               Resume.pdf
